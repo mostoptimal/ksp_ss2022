@@ -18,25 +18,11 @@
 
 unsigned int instruction;
 
+
+//Stack Begin---------------------------------------------------------------------
 int sp = 0;
 int stack[MAX_ITEMS];
 
-/*
-unsigned int halt = HALT << 24; // <- 0x00000000
-unsigned int push_c = PUSHC << 24; // <- 0x01000000
-unsigned int add = ADD << 24; // <- 0x02000000
-unsigned int sub = SUB << 24; // <- 0x03000000
-unsigned int mul = MUL << 24; // <- 0x04000000
-unsigned int div = DIV << 24; // <- 0x05000000
-unsigned int mod = MOD << 24; // <- 0x06000000
-unsigned int rdint = RDINT << 24; // <- 0x07000000
-unsigned int wrint = WRINT << 24; // <- 0x08000000
-unsigned int rdchr = RDCHR << 24; // <- 0x09000000
-unsigned int wrchr = WRCHR << 24; // <- 0x10000000
-*/
-
-
-//Stack Begin---------------------------------------------------------------------
 void push(int x) {
     printf("-[%4s]-> pushing [%d] onto stack @sp [%d]\n", __func__, x, sp);
     stack[sp] = x;
@@ -44,6 +30,7 @@ void push(int x) {
     sp++;
     printf("%d]\n", sp);
 }
+
 int pop(void) {
     printf("-[%4s]-> dec stack pointer [%d -> ", __func__, sp);
     sp--;
@@ -72,42 +59,42 @@ void execute(int instruct) {
         case 0://HALT
             break;
         case 1://PUSHC
-            printf("PUSHC[ %d ]",instruct);
+            printf("PUSHC[ %d ]", instruct);
             push(instruct);
 
         case 2://ADD
             a = pop();
             b = pop();
             a = a + b;
-            printf("ADD %d + %d",a,b);
+            printf("ADD %d + %d", a, b);
             push(a);
 
         case 3://SUB
             a = pop();
             b = pop();
             a = a - b;
-            printf("SUB %d - %d",a,b);
+            printf("SUB %d - %d", a, b);
             push(a);
 
         case 4://MUL
             a = pop();
             b = pop();
             a = a * b;
-            printf("MUL %d * %d",a,b);
+            printf("MUL %d * %d", a, b);
             push(a);
 
         case 5://DIV
             a = pop();
             b = pop();
             a = a / b;
-            printf("DIV %d / %d",a,b);
+            printf("DIV %d / %d", a, b);
             push(a);
 
         case 6://MOD
             a = pop();
             b = pop();
             a = a % b;
-            printf("MOD %d % %d",a,b);
+            printf("MOD %d % %d", a, b);
             push(a);
     }
 }
@@ -148,7 +135,7 @@ unsigned int program_2_memory[] = { //Program_2
         (HALT << 24)
 };
 
-unsigned int program_3_memory[]= {
+unsigned int program_3_memory[] = {
         (RDCHR << 24),
         (WRINT << 24),
         (PUSHC << 24) | IMMEDIATE('\n'),
@@ -198,10 +185,11 @@ int main(int argc, char *argv[]) {
     unsigned int opcode = program_1_memory[0];
     while (opcode != HALT) {
         instruction = program_memory[pc];
-        printf("PC = %d   ",instruction);
-        opcode=program_1_memory[pc];
-        printf("OPCode = %d \n",opcode);
+        printf("PC = %d   ", instruction);
+
+        printf("OPCode = %d \n", opcode);
         pc++;
+        opcode = program_1_memory[pc];
         execute(instruction);
     }
 
