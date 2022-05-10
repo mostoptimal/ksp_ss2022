@@ -64,8 +64,43 @@ unsigned int program_memory[] = { //Example
 };
 
 
-
 //-------------------------------------------------------------
+int main(int argc, char *argv[]) {
+    FILE *fp = NULL;
+    char filename[128];
+    char error_msg[256];
+    int read_len = 0;
+    sprintf(filename, "./xy.z");
+    if ((fp = fopen(filename, "r")) == NULL) {
+        snprintf(error_msg, 256, "ERROR (fdopen) -> File (%s)",
+                 filename);
+        perror(error_msg);
+        exit(1);
+    }
+    char c[4];
+    unsigned int x;
+    printf("idxHEX CHAR |idxHEX CHAR |");
+    printf("idxHEX CHAR |idxHEX CHAR\n");
+    while ((read_len = fread(c, 1, 4, fp)) != 0) {
+        printf("c[0]=[0x%1$x] [%1$c] |", c[0]);
+        printf("c[1]=[0x%1$x] [%1$c] |", c[1]);
+        printf("c[2]=[0x%1$x] [%1$c] |", c[2]);
+        printf("c[3]=[0x%1$x] [%1$c]\n", c[3]);
+    }
+    printf("\nfile position = [%lu] after 1. loop\n", ftell(fp));
+    fseek(fp, 0, SEEK_SET); // seek back to beginning of file
+    while ((read_len = fread(&x, sizeof(unsigned int), 1, fp)) != 0) {
+        printf("read %d object [%ld bytes]: x = [0x%08x]\n",
+               read_len, read_len * sizeof(unsigned int), x);
+    }
+    if (fclose(fp) != 0) {
+        perror("ERROR (fclose)");
+    }
+    return 0;
+}
+
+
+/*
 int main(int argc, char *argv[]) {
     //file Operations......
     FILE *fp;
@@ -90,6 +125,7 @@ int main(int argc, char *argv[]) {
         execute(instruction);
     }
 
+*/
 /*
  *  int value;
     print_stack();
@@ -98,6 +134,7 @@ int main(int argc, char *argv[]) {
     push(3);
     print_stack();
     value = pop();
-    print_stack();*/
+    print_stack();*//*
+
     return 0;
-}
+}*/
