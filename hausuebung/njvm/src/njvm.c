@@ -5,9 +5,11 @@
 #include "opCodes.h"
 
 unsigned int instruction;
+int sda[100]; //static Data Area
+int sdaCounter = 0;
 
 void execute(int instruct) {
-    int a, b;
+    int a, b, n;
     switch (instruct) {
         case 0://HALT
             break;
@@ -22,14 +24,14 @@ void execute(int instruct) {
             printf("ADD %d + %d", a, b);
             push(a);
 
-        case SUB://SUB
+        case 3://SUB
             a = pop();
             b = pop();
             a = a - b;
             printf("SUB %d - %d", a, b);
             push(a);
 
-        case MUL://MUL
+        case 4://MUL
             a = pop();
             b = pop();
             a = a * b;
@@ -49,9 +51,13 @@ void execute(int instruct) {
             a = a % b;
             printf("MOD %d %d", a, b);
             push(a);
+        case 11://PUSHG
+            a = sda[n];
+            pushg < n > (a);
+
+
     }
 }
-
 
 unsigned int program_memory[] = { //Example
         0x01000002, //program_memory[0]
@@ -70,10 +76,9 @@ int main(int argc, char *argv[]) {
     char filename[128];
     char error_msg[256];
     int read_len = 0;
-    sprintf(filename, "./xy.z");
+    sprintf(filename, "./test.asm");
     if ((fp = fopen(filename, "r")) == NULL) {
-        snprintf(error_msg, 256, "ERROR (fdopen) -> File (%s)",
-                 filename);
+        snprintf(error_msg, 256, "ERROR (fdopen) -> File (%s)", filename);
         perror(error_msg);
         exit(1);
     }
@@ -90,8 +95,10 @@ int main(int argc, char *argv[]) {
     printf("\nfile position = [%lu] after 1. loop\n", ftell(fp));
     fseek(fp, 0, SEEK_SET); // seek back to beginning of file
     while ((read_len = fread(&x, sizeof(unsigned int), 1, fp)) != 0) {
-        printf("read %d object [%ld bytes]: x = [0x%08x]\n",
-               read_len, read_len * sizeof(unsigned int), x);
+        printf("read %d object [%ld bytes]: x = [0x%08x]\n", read_len, read_len * sizeof(unsigned int), x);
+    }
+    while (fread(c, 1, 4, fp) == !EOF) {
+
     }
     if (fclose(fp) != 0) {
         perror("ERROR (fclose)");

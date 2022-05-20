@@ -6,6 +6,8 @@
 #define HAUSUEBUNG_STACK_H
 void push(int x);
 int pop(void);
+void pushg(int x);
+int popg(void);
 void print_stack(void);
 #endif //HAUSUEBUNG_STACK_H
 

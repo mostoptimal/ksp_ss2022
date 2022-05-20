@@ -17,12 +17,28 @@ void push(int x) {
     printf("%d]\n", sp);
 }
 
+void pushg(int x) {
+    printf("-[%4s]-> pushing [%d] onto stack @sp [%d]\n", __func__, x, sp);
+    stack[sp] = x;
+    printf("-[%4s]-> inc stack pointer [%d -> ", __func__, sp);
+    sp++;
+    printf("%d]\n", sp);
+}
+
 int pop(void) {
     printf("-[%4s]-> dec stack pointer [%d -> ", __func__, sp);
     sp--;
     printf("%d]\n", sp);
     int tmp = stack[sp];
     printf("-[%4s]-> popping [%d] from stack @sp [%d]\n", __func__, tmp, sp);
+    return tmp;
+}
+int popg(void) {
+    printf("-[%4s]-> dec sda pointer [%d -> ", __func__, sp);
+    sdaCounter--;
+    printf("%d]\n", sp);
+    int tmp = sda[sdaCounter];
+    printf("-[%4s]-> popping [%d] from sda @sp [%d]\n", __func__, tmp, sp);
     return tmp;
 }
 
