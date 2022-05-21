@@ -1,15 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include "stack.h"
 #include "programs.h"
 #include "opCodes.h"
 
 unsigned int instruction;
-int sda[100]; //static Data Area
+int *sda; //static Data Area
+char *formatValue;
+int version;
+int instructionNumber;
+int variablesNumber;
 int sdaCounter = 0;
+int pc = 0;
+unsigned int *allInstruct;
+unsigned int *allVariable;
+FILE *fp;
+//char filename[] = "t.bin";
+char error_msg[256];
+int read_len = 0;
 
 void execute(int instruct) {
-    int a, b, n;
+    int a, b;
     switch (instruct) {
         case 0://HALT
             break;
@@ -51,9 +64,9 @@ void execute(int instruct) {
             a = a % b;
             printf("MOD %d %d", a, b);
             push(a);
-        case 11://PUSHG
-            a = sda[n];
-            pushg < n > (a);
+        //case 11: //PUSHG
+            //a = sda[n];
+            //pushg < n > (a);
 
 
     }
@@ -66,40 +79,82 @@ unsigned int program_memory[] = { //Example
         0x01000005, //program_memory[3]
         0x02000000, //program_memory[4]
         0x08000000, //program_memory[5]
-        0x00000000 //program_memory[6]
+        0x00000000  //program_memory[6]
 };
 
 
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
-    FILE *fp = NULL;
-    char filename[128];
-    char error_msg[256];
-    int read_len = 0;
-    sprintf(filename, "./test.asm");
-    if ((fp = fopen(filename, "r")) == NULL) {
-        snprintf(error_msg, 256, "ERROR (fdopen) -> File (%s)", filename);
+
+    fp = fopen("njvm/src/t.txt", "r");
+    //printf("File:%s \n",fp);
+    if (fp == NULL) {
+        snprintf(error_msg, 256, "ERROR (fopen) -> File (%s)", fp);
         perror(error_msg);
         exit(1);
     }
+
+    /** 1st Step: read the format of Binary File "NJBF" */
+    //1) Read the first 4 bytes of the file.
+    fread(&formatValue,sizeof (int),1,fp);
+    if (strcmp(formatValue, "NJBF") != 0) {
+        printf("the Format in File is not exact!");
+        exit(1);
+    }
+
+    /** 2nd Step: Read the version number. */
+    //2) Read the version number.
+
+    fread(&version, sizeof(int), 1, fp);
+    if (version != 2) {
+        printf("the file does not have the right Version, %d \n", version);
+        exit(1);
+    }
+
+    /** 3rd Step: Read the Number of Instructions */
+    // 3) Read the number of instructions.
+    fread(&instructionNumber, sizeof(int), 1, fp);
+    allInstruct = malloc(instructionNumber * sizeof(unsigned int));
+
+    /** 4th Step: read the Number of Global-Variables in SDA */
+    //4) Read the number of variables in the static data area.
+    fread(&variablesNumber, sizeof(int), 1, fp);
+    if (variablesNumber > 0) {
+        sda = malloc(variablesNumber * sizeof(int));
+        //SDA Allocate for Public Variables
+    }
+
+    /**5th Step: reading the rest of File */
+    //5) Read the rest of the file into the memory allocated in step 3).
+    int fileReadValue = fread(allInstruct, sizeof(unsigned int), instructionNumber, fp);
+
+
     char c[4];
     unsigned int x;
-    printf("idxHEX CHAR |idxHEX CHAR |");
-    printf("idxHEX CHAR |idxHEX CHAR\n");
+
     while ((read_len = fread(c, 1, 4, fp)) != 0) {
-        printf("c[0]=[0x%1$x] [%1$c] |", c[0]);
-        printf("c[1]=[0x%1$x] [%1$c] |", c[1]);
-        printf("c[2]=[0x%1$x] [%1$c] |", c[2]);
-        printf("c[3]=[0x%1$x] [%1$c]\n", c[3]);
+        printf("The read Value from File:%d ", fileReadValue);
     }
+
     printf("\nfile position = [%lu] after 1. loop\n", ftell(fp));
     fseek(fp, 0, SEEK_SET); // seek back to beginning of file
     while ((read_len = fread(&x, sizeof(unsigned int), 1, fp)) != 0) {
         printf("read %d object [%ld bytes]: x = [0x%08x]\n", read_len, read_len * sizeof(unsigned int), x);
     }
-    while (fread(c, 1, 4, fp) == !EOF) {
 
+    // now reading the Code from file
+    /**
+    while (fread(c, 1, 4, fp) != EOF) {
+        instruction = program_memory[pc];
+        printf("PC = %d   ", instruction);
+
+        printf("OPCode = %d \n", opcode);
+        pc++;
+        opcode = program_1_memory[pc];
+        execute(instruction);
     }
+*/
+
     if (fclose(fp) != 0) {
         perror("ERROR (fclose)");
     }

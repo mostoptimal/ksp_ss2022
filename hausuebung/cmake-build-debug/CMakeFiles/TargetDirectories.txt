@@ -1,3 +1,3 @@
-/home/mohamad/Downloads/THM/6. SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/mohamad/Downloads/THM/6. SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/mohamad/Downloads/THM/6. SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug/CMakeFiles/hausuebung.dir
+/home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug/CMakeFiles/hausuebung.dir
+/home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug/CMakeFiles/rebuild_cache.dir
