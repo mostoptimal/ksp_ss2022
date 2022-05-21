@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include "stack.h"
 #include "programs.h"
 #include "opCodes.h"
 
+
+FILE *fp;
 unsigned int instruction;
 int *sda; //static Data Area
 char *formatValue;
@@ -16,7 +17,7 @@ int sdaCounter = 0;
 int pc = 0;
 unsigned int *allInstruct;
 unsigned int *allVariable;
-FILE *fp;
+
 //char filename[] = "t.bin";
 char error_msg[256];
 int read_len = 0;
@@ -64,7 +65,7 @@ void execute(int instruct) {
             a = a % b;
             printf("MOD %d %d", a, b);
             push(a);
-        //case 11: //PUSHG
+            //case 11: //PUSHG
             //a = sda[n];
             //pushg < n > (a);
 
@@ -72,7 +73,7 @@ void execute(int instruct) {
     }
 }
 
-unsigned int program_memory[] = { //Example
+/*unsigned int program_memory[] = { //Example
         0x01000002, //program_memory[0]
         0x01000003, //program_memory[1]
         0x04000000, //program_memory[2]
@@ -80,24 +81,27 @@ unsigned int program_memory[] = { //Example
         0x02000000, //program_memory[4]
         0x08000000, //program_memory[5]
         0x00000000  //program_memory[6]
-};
+};*/
 
 
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
-
-    fp = fopen("njvm/src/t.txt", "r");
+    char cbb[4];
+    fp = fopen("t.bin", "r");
     //printf("File:%s \n",fp);
     if (fp == NULL) {
-        snprintf(error_msg, 256, "ERROR (fopen) -> File (%s)", fp);
+        snprintf(error_msg, 256, "ERROR (fopen) -> File ()");
         perror(error_msg);
         exit(1);
     }
 
     /** 1st Step: read the format of Binary File "NJBF" */
     //1) Read the first 4 bytes of the file.
-    fread(&formatValue,sizeof (int),1,fp);
-    if (strcmp(formatValue, "NJBF") != 0) {
+    //read_len = fread(&cbb, 1 * sizeof(char), 10, fp);
+    read_len = fscanf(fp,"F",cbb);
+    //read_len = fread(formatValue, 4 * sizeof(char *), 1, fp);
+    printf("cbb[0]=%c , cbb[1]=%c , cbb[2]=%c , cbb[3]=%c\n",cbb[0],cbb[1],cbb[2],cbb[3]);
+    if (strcmp(cbb, "NJBF") != 0) {
         printf("the Format in File is not exact!");
         exit(1);
     }
@@ -128,19 +132,6 @@ int main(int argc, char *argv[]) {
     //5) Read the rest of the file into the memory allocated in step 3).
     int fileReadValue = fread(allInstruct, sizeof(unsigned int), instructionNumber, fp);
 
-
-    char c[4];
-    unsigned int x;
-
-    while ((read_len = fread(c, 1, 4, fp)) != 0) {
-        printf("The read Value from File:%d ", fileReadValue);
-    }
-
-    printf("\nfile position = [%lu] after 1. loop\n", ftell(fp));
-    fseek(fp, 0, SEEK_SET); // seek back to beginning of file
-    while ((read_len = fread(&x, sizeof(unsigned int), 1, fp)) != 0) {
-        printf("read %d object [%ld bytes]: x = [0x%08x]\n", read_len, read_len * sizeof(unsigned int), x);
-    }
 
     // now reading the Code from file
     /**
