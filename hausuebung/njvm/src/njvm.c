@@ -138,10 +138,8 @@ void execute(int instruct) {
 
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
-    unsigned int x;
-    char strFormatIdentifier[4];
-
-    fp = fopen("prog1.bin", "r");
+    //TODO: file path as Argument
+    fp = fopen("oo.bin", "r");
 
     printf("after fopen() before if NULL \n");
     if (fp == NULL) {
@@ -152,51 +150,54 @@ int main(int argc, char *argv[]) {
     /** 1st Step: read the format of Binary File "NJBF" */
     //1) Read the first 4 bytes of the file.
     //fscanf(fp, "%s", strFormatIdentifier);
+    char *njbf = (char *) malloc(sizeof(char) * 4);
+    int s1 = fread(njbf, sizeof(char), 4, fp); // streamfile speicher les 4 premiers bytes Format
+    printf("das ist %d\n", s1);
 
-    fread(&strFormatIdentifier, sizeof(char), 4, fp); // streamfile speicher les 4 premiers bytes Format
-
-    if(strncmp(strFormatIdentifier, FORMAT, 4) == 0){
+    if (strcmp(njbf, "NJBF") == 0) {
         printf("Format is Correct :) \n");
+    } else {
+        printf("Format is inCorrect :( !!!");
+        exit(1);
     }
 
     printf("after fread(&x, 1, 1, fp);\n");
-/*    for (int i = 0; i <= 3; i++) {
-        printf("%.2x\t", strFormatIdentifier); //2x pr l hexadecimal
-    }*/
-    printf("\n");
 
-/*    if (strFormatIdentifier == 0x4e4a4246) {
-        printf("matched!!!");
-    } else {
-        printf("NOT matched!!!");
-        exit(1);
-    }*/
-
-    /** 2nd Step: Read the version number. */
+    /** 2nd Step: Read the version number. **********/
     //2) Read the version number.
-
+    printf("2nd Step\n");
     fread(&version, sizeof(int), 1, fp);
+    printf("after 2nd fread()\n");
     if (version != 2) {
         printf("the file does not have the right Version, %d \n", version);
         exit(1);
+    } else {
+        printf("Version is right :)\n");
     }
+    printf("after if version \n");
 
     /** 3rd Step: Read the Number of Instructions */
     // 3) Read the number of instructions.
+    printf("3rd Step\n");
     fread(&instructionNumber, sizeof(int), 1, fp);
+    printf("after fread(3)\n");
     allInstruct = malloc(instructionNumber * sizeof(unsigned int));
+    printf("allInstruct: %p\n", allInstruct);
+    printf("instutNmber: %d\n",instructionNumber);
 
     /** 4th Step: read the Number of Global-Variables in SDA */
     //4) Read the number of variables in the static data area.
     fread(&variablesNumber, sizeof(int), 1, fp);
+
     if (variablesNumber > 0) {
+        printf("Number of Vars: %d\n",variablesNumber);
         sda = malloc(variablesNumber * sizeof(int));
         //SDA Allocate for Public Variables
     }
 
     /**5th Step: reading the rest of File */
     //5) Read the rest of the file into the memory allocated in step 3).
-    int fileReadValue = fread(allInstruct, sizeof(unsigned int), instructionNumber, fp);
+    //int fileReadValue = fread(allInstruct, sizeof(unsigned int), instructionNumber, fp);
 
 
     // now reading the Code from file
