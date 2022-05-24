@@ -4,7 +4,9 @@
 #include "stack.h"
 #include "programs.h"
 #include "opCodes.h"
+#include "instructions.h" //Contains VM Instructions
 
+#define FORMAT "NJBF"
 
 FILE *fp;
 unsigned int instruction;
@@ -23,7 +25,8 @@ char error_msg[256];
 int read_len = 0;
 
 void execute(int instruct) {
-    int a, b;
+    int a, b, res, target;
+    int jmpTarget;
     switch (instruct) {
         case 0://HALT
             break;
@@ -65,11 +68,60 @@ void execute(int instruct) {
             a = a % b;
             printf("MOD %d %d", a, b);
             push(a);
+
             //case 11: //PUSHG
             //a = sda[n];
             //pushg < n > (a);
 
+        case 17://eq
+            a = pop();
+            b = pop();
+            res = equal(a, b);
+            push(res);
 
+        case 18://ne
+            a = pop();
+            b = pop();
+            res = nequal(a, b);
+            push(res);
+
+        case 19://lt
+            a = pop();
+            b = pop();
+            res = lessThan(a, b);
+            push(res);
+
+        case 20://le
+            a = pop();
+            b = pop();
+            res = lessEqual(a, b);
+            push(res);
+
+        case 21://gt
+            a = pop();
+            b = pop();
+            res = greaterThan(a, b);
+            push(res);
+
+        case 22://ge
+            a = pop();
+            b = pop();
+            res = greaterEqual(a, b);
+            push(res);
+
+        case 23://jmp <target>
+            pc = jump(jmpTarget);
+
+        case 24://brf <target>
+            b = pop();
+            pc = branchFalse(b, target);
+
+        case 25://brt <target>
+            b = pop();
+            pc = branchTrue(b, target);
+
+        default:
+            printf("not on the List of the Instructions in VM...!!");
     }
 }
 
@@ -86,25 +138,39 @@ void execute(int instruct) {
 
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
-    char cbb[4];
-    fp = fopen("t.bin", "r");
-    //printf("File:%s \n",fp);
+    unsigned int x;
+    char strFormatIdentifier[4];
+
+    fp = fopen("prog1.bin", "r");
+
+    printf("after fopen() before if NULL \n");
     if (fp == NULL) {
-        snprintf(error_msg, 256, "ERROR (fopen) -> File ()");
-        perror(error_msg);
+        perror("Error File Open!!\n");
         exit(1);
     }
 
     /** 1st Step: read the format of Binary File "NJBF" */
     //1) Read the first 4 bytes of the file.
-    //read_len = fread(&cbb, 1 * sizeof(char), 10, fp);
-    read_len = fscanf(fp,"F",cbb);
-    //read_len = fread(formatValue, 4 * sizeof(char *), 1, fp);
-    printf("cbb[0]=%c , cbb[1]=%c , cbb[2]=%c , cbb[3]=%c\n",cbb[0],cbb[1],cbb[2],cbb[3]);
-    if (strcmp(cbb, "NJBF") != 0) {
-        printf("the Format in File is not exact!");
-        exit(1);
+    //fscanf(fp, "%s", strFormatIdentifier);
+
+    fread(&strFormatIdentifier, sizeof(char), 4, fp); // streamfile speicher les 4 premiers bytes Format
+
+    if(strncmp(strFormatIdentifier, FORMAT, 4) == 0){
+        printf("Format is Correct :) \n");
     }
+
+    printf("after fread(&x, 1, 1, fp);\n");
+/*    for (int i = 0; i <= 3; i++) {
+        printf("%.2x\t", strFormatIdentifier); //2x pr l hexadecimal
+    }*/
+    printf("\n");
+
+/*    if (strFormatIdentifier == 0x4e4a4246) {
+        printf("matched!!!");
+    } else {
+        printf("NOT matched!!!");
+        exit(1);
+    }*/
 
     /** 2nd Step: Read the version number. */
     //2) Read the version number.

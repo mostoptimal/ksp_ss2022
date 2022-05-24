@@ -3,6 +3,7 @@
 //
 #include "opCodes.h"
 #include "programs.h"
+
 unsigned int program_1_memory[] = { //Program_1
         (PUSHC << 24) | IMMEDIATE(3),
         (PUSHC << 24) | IMMEDIATE(4),
@@ -34,4 +35,22 @@ unsigned int program_3_memory[] = {
         (PUSHC << 24) | IMMEDIATE('\n'),
         (WRCHR << 24),
         (HALT << 24)
+};
+unsigned int program_dumbIdea[] = {
+        (MOD << 24),
+        (DIV << 24),
+        (RSF << 24),
+        (EQ << 24),
+        (NE << 24),
+        (NE << 24),
+        (LT << 24),
+        (LE << 24),
+        (GT << 24),
+        (GE << 24)
+};
+
+unsigned int program_simpleIF[]={
+        (PUSHC<<24),
+        (PUSHC<<24),
+        (EQ<<24)
 };
