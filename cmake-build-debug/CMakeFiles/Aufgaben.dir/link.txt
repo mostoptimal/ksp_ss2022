@@ -1,0 +1,1 @@
+/usr/bin/cc -g CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o -o Aufgaben 

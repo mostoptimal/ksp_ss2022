@@ -1,6 +1,4 @@
-//
-// Created by mohamad on 5/6/22.
-//
+
 
 #ifndef HAUSUEBUNG_OPCODES_H
 #define HAUSUEBUNG_OPCODES_H
@@ -36,7 +34,7 @@
 #define PUSHR 29
 #define POPR 30
 #define DUP 31
-
+#define OP_CODE(instr) ((instr)>>24)
 #define IMMEDIATE(x) ((x)&0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #endif //HAUSUEBUNG_OPCODES_H

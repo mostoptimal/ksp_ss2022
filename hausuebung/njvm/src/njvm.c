@@ -7,7 +7,8 @@
 #include "opCodes.h"
 #include "instructions.h" //Contains VM Instructions
 
-
+#define DEBUG
+#define FORMAT "NJBF"
 char *runOption;
 FILE *fp;
 unsigned int instruction;
@@ -18,16 +19,27 @@ int instructionNumber;
 int variablesNumber;
 int sdaCounter = 0;
 int pc = 0;
+int sp=0;
 unsigned int *allInstruct;
 unsigned int *allVariable;
 
 //char filename[] = "t.bin";
 char error_msg[256];
 int read_len = 0;
+/** todo list
+ * 1)  run instruction testen
+ * 2) execute testen
+ *  3) pushl und pushg popg popl testen
+ *  4) implementieren call , andere methode drop,
+ *  5) test die ausgabe von aufgabe 2 ,3 ,4
+ *  6) debbug implementieren als option ,
+   */
 
 void execute(unsigned int instruct, int immediate) {
     int a, b, res, target;
     int jmpTarget = immediate;
+    instruct=SIGN_EXTEND(instruct);
+
     switch (instruct) {
         case 0://HALT
             break;
@@ -121,22 +133,71 @@ void execute(unsigned int instruct, int immediate) {
             b = pop();
             pc = branchTrue(b, target);
 
+        case CALL:
+             //inemediate werte instruction
+             push(pc);
+             pc = immediate;
+            // pc = jump()
+            //  instruction anrufen
+
+        case RET:
+           pc = pop();
+        case DROP:
+        {
+           int k =0;
+           while(k<immediate){
+             pop();
+           ++k;
+            }
+        }
+
+        case PUSHR:
+
+        case POPR:
+
+        case DUP:
+            // sp +1
+            // lege ich da die gleiche variable
+            a = pop();
+            push(a);
+            push(a);
+
         default:
             printf("not on the List of the Instructions in VM...!!");
     }
 }
 
 
+
+
+ void RuninstructiontoAssemble(int porgrammemory[]){
+    int i = 0;
+    while (porgrammemory[i]!=0){// HALT
+        execute(porgrammemory[i], 1);
+        i++;
+        pc++;
+    }
+ }
+
+/*unsigned int program_memory[] = { //Example
+        0x01000002, //program_memory[0]
+        0x01000003, //program_memory[1]
+        0x04000000, //program_memory[2]
+        0x01000005, //program_memory[3]
+        0x02000000, //program_memory[4]
+        0x08000000, //program_memory[5]
+        0x00000000  //program_memory[6]
+};*/
 void readInputInTerminal(char *argv[], int argc) {
     //read info for data
     //argumente
     //  char allarguments [argc];
-    if (argc < 1) {
+    if (argv < 0) {
         printf("u dont have any parameter");
     }
     for (int i = 1; i < argc; i++) {
         //
-        if (strcmp(argv[i], "--debug") == 0) {
+        if (strcmp(argv[i], "--debug")==0) {
             //call program , option
             runOption = "debug";
             char debugOption;
@@ -203,6 +264,8 @@ int main(int argc, char *argv[]) {
         }
 
     }
+// to do later
+#define DEBUG
 */
 
     fp = fopen(path, "r");

@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/mohamad/Downloads/THM/6. SoSe22/KSP/Aufgaben/cmake-build-debug",
-		"source" : "/home/mohamad/Downloads/THM/6. SoSe22/KSP/Aufgaben"
+		"build" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug",
+		"source" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022"
 	},
 	"version" : 
 	{
