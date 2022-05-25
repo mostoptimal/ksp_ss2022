@@ -7,6 +7,7 @@
 #include "opCodes.h"
 #include "instructions.h" //Contains VM Instructions
 
+#define DEBUG
 #define FORMAT "NJBF"
 char* runoption;
 FILE *fp;
@@ -18,16 +19,27 @@ int instructionNumber;
 int variablesNumber;
 int sdaCounter = 0;
 int pc = 0;
+int sp=0;
 unsigned int *allInstruct;
 unsigned int *allVariable;
 
 //char filename[] = "t.bin";
 char error_msg[256];
 int read_len = 0;
+/** todo list
+ * 1)  run instruction testen
+ * 2) execute testen
+ *  3) pushl und pushg popg popl testen
+ *  4) implementieren call , andere methode drop,
+ *  5) test die ausgabe von aufgabe 2 ,3 ,4
+ *  6) debbug implementieren als option ,
+   */
 
 void execute(unsigned int instruct, int immediate) {
     int a, b, res, target;
     int jmpTarget = immediate;
+    instruct=SIGN_EXTEND(instruct);
+
     switch (instruct) {
         case 0://HALT
             break;
@@ -35,7 +47,7 @@ void execute(unsigned int instruct, int immediate) {
             printf("PUSHC[ %d ]", instruct);
             push(instruct);
 
-        case 2://ADD
+        case ADD://ADD
             a = pop();
             b = pop();
             a = a + b;
@@ -121,10 +133,50 @@ void execute(unsigned int instruct, int immediate) {
             b = pop();
             pc = branchTrue(b, target);
 
+        case CALL:
+             //inemediate werte instruction
+             push(pc);
+             pc = immediate;
+            // pc = jump()
+            //  instruction anrufen
+
+        case RET:
+           pc = pop();
+        case DROP:
+        {
+           int k =0;
+           while(k<immediate){
+             pop();
+           ++k;
+            }
+        }
+
+        case PUSHR:
+
+        case POPR:
+
+        case DUP:
+            // sp +1
+            // lege ich da die gleiche variable
+            a = pop();
+            push(a);
+            push(a);
+
         default:
             printf("not on the List of the Instructions in VM...!!");
     }
 }
+
+
+
+ void RuninstructiontoAssemble(int porgrammemory[]){
+    int i = 0;
+    while (porgrammemory[i]!=0){// HALT
+        execute(porgrammemory[i], 1);
+        i++;
+        pc++;
+    }
+ }
 
 /*unsigned int program_memory[] = { //Example
         0x01000002, //program_memory[0]
@@ -209,8 +261,8 @@ int main(int argc, char *argv[]) {
         }
 
     }
-
-
+// to do later
+#define DEBUG
     fp = fopen(path, "r");
 
     printf("after fopen() before if NULL \n");
@@ -262,7 +314,7 @@ int main(int argc, char *argv[]) {
     fread(&variablesNumber, sizeof(int), 1, fp);
 
     if (variablesNumber > 0) {
-        printf("Number of Vars: %d\n", variablesNumber);
+        printf("Number of Vars: %d\n",variablesNumber);
         sda = malloc(variablesNumber * sizeof(int));
         //SDA Allocate for Public Variables
     }
@@ -307,15 +359,6 @@ int main(int argc, char *argv[]) {
     //file Operations End....
     int pc = 0;
     unsigned int opcode = program_1_memory[0];
-    while (opcode != HALT) {
-        instruction = program_memory[pc];
-        printf("PC = %d   ", instruction);
-
-        printf("OPCode = %d \n", opcode);
-        pc++;
-        opcode = program_1_memory[pc];
-        execute(instruction);
-    }
 
 */
 /*
