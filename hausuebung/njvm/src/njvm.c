@@ -19,7 +19,6 @@ int instructionNumber;
 int variablesNumber;
 int sdaCounter = 0;
 int pc = 0;
-int sp=0;
 unsigned int *allInstruct;
 unsigned int *allVariable;
 
@@ -201,8 +200,8 @@ void readInputInTerminal(char *argv[], int argc) {
             //call program , option
             runOption = "debug";
             char debugOption = 0;
-            char i, l, b, s, r, q;
-            scanf("%c", debugOption);
+
+            scanf("%c", &debugOption);
 
             switch (debugOption) {
 
@@ -321,7 +320,6 @@ int main(int argc, char *argv[]) {
     if (variablesNumber > 0) {
         printf("Number of Vars: %d\n", variablesNumber);
         //SDA Allocate for Public Variables
-        sda = malloc(variablesNumber * sizeof(int));
     }
 
     /**5th Step: reading the rest of File */
