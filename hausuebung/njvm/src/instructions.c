@@ -36,7 +36,7 @@ int greaterEqual(int v1, int v2) {
 }
 
 int jump(int label) {
-
+    return label;
 }
 
 int branchFalse(int condition, int target) {

@@ -7,3 +7,7 @@
 0	44	1653408398594947555	CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o	77f87da7563d2431
 0	38	1653409759592179163	CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o	77f87da7563d2431
 38	57	1653409759612179568	hausuebung	7c685302f310bb6d
+2	28	1653460833891280672	CMakeFiles/hausuebung.dir/njvm/src/instructions.c.o	3d4a7267a783be9
+1	37	1653460833899280850	CMakeFiles/hausuebung.dir/njvm/src/stack.c.o	c6c54efdc811d8e
+1	51	1653460833915281206	CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o	77f87da7563d2431
+51	76	1653460833939281740	hausuebung	7c685302f310bb6d

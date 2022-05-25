@@ -4,7 +4,7 @@
 
 #ifndef HAUSUEBUNG_STACK_H
 #define HAUSUEBUNG_STACK_H
-void push(int x);
+void push(unsigned int x);
 int pop(void);
 void pushg(int x);
 int popg(void);

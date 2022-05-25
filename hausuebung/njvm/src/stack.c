@@ -9,7 +9,7 @@
 int sp = 0;
 int stack[MAX_ITEMS];
 
-void push(int x) {
+void push(unsigned int x) {
     printf("-[%4s]-> pushing [%d] onto stack @sp [%d]\n", __func__, x, sp);
     stack[sp] = x;
     printf("-[%4s]-> inc stack pointer [%d -> ", __func__, sp);

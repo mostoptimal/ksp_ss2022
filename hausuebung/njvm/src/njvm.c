@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 #include "stack.h"
 #include "programs.h"
 #include "opCodes.h"
 #include "instructions.h" //Contains VM Instructions
 
 #define FORMAT "NJBF"
-
+char* runoption;
 FILE *fp;
 unsigned int instruction;
 int *sda; //static Data Area
@@ -24,9 +25,9 @@ unsigned int *allVariable;
 char error_msg[256];
 int read_len = 0;
 
-void execute(int instruct) {
+void execute(unsigned int instruct, int immediate) {
     int a, b, res, target;
-    int jmpTarget;
+    int jmpTarget = immediate;
     switch (instruct) {
         case 0://HALT
             break;
@@ -134,12 +135,83 @@ void execute(int instruct) {
         0x08000000, //program_memory[5]
         0x00000000  //program_memory[6]
 };*/
+void readInputInTerminal(char *argv[], int argc) {
+    //read info for data
+    //argumente
+    //  char allarguments [argc];
+    if (argv < 0) {
+        printf("u dont have any parameter");
+    }
+    for (int i = 1; i < argc; i++) {
+        //
+        if (strcmp(argv[i], "--debug")==0) {
+            //call program , option
+            runoption = "debug";
+            char debugoption;
+            char i, l, b, s, r, q;
+            scanf("%c", debugoption);
 
+            switch (debugoption) {
+
+                case 'i':
+                    break;
+
+                case 'l':
+                    break;
+
+                case 'b':
+                    break;
+
+                case 's':
+                    break;
+
+                case 'r':
+                    break;
+
+                case 'q':
+                    break;
+
+                default:
+                    break;
+
+            }
+        }
+        //  allarguments[i] = argumente[i];
+    }
+    //option  filename
+    // OPTION  -- debug , --run
+
+}
 
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
     //TODO: file path as Argument
-    fp = fopen("oo.bin", "r");
+    char *path;
+    path=argv[1];
+   if (argc >= 2) {
+        for (int i = 2; i < argc ; i++) {
+            if (strcmp(argv[i], "--version") == 0) {
+                printf("Ninja Virtual Machine (compiled %s at %s)\n", __DATE__, __TIME__);
+                return 0;
+            } else if (strcmp(argv[i], "--help") == 0) {
+                printf("Usage: ./njvm [option]\n");
+                printf("  --help          Show this help and exits\n");
+                printf("  --version       Show NJVM version and exits\n");
+                printf("  [file]          Loads the file and runs it (filename cannot start with \"--\"\n");
+                printf("  [file] --debug  Loads the file and runs it in debug mode\n");
+                return 0;
+            } else if (strcmp(argv[i], "--debug") == 0) {
+                //debug = 1;
+            } else {
+                printf("unknown argument '%s', try './njvm --help'", argv[1]);
+                return 1;
+            }
+        }
+
+    }
+
+
+    fp = fopen(path, "r");
 
     printf("after fopen() before if NULL \n");
     if (fp == NULL) {
@@ -182,15 +254,15 @@ int main(int argc, char *argv[]) {
     fread(&instructionNumber, sizeof(int), 1, fp);
     printf("after fread(3)\n");
     allInstruct = malloc(instructionNumber * sizeof(unsigned int));
-    printf("allInstruct: %p\n", allInstruct);
-    printf("instutNmber: %d\n",instructionNumber);
+
+    printf("instutNmber: %d\n", instructionNumber);
 
     /** 4th Step: read the Number of Global-Variables in SDA */
     //4) Read the number of variables in the static data area.
     fread(&variablesNumber, sizeof(int), 1, fp);
 
     if (variablesNumber > 0) {
-        printf("Number of Vars: %d\n",variablesNumber);
+        printf("Number of Vars: %d\n", variablesNumber);
         sda = malloc(variablesNumber * sizeof(int));
         //SDA Allocate for Public Variables
     }
