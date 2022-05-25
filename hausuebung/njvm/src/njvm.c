@@ -192,15 +192,15 @@ void readInputInTerminal(char *argv[], int argc) {
     //read info for data
     //argumente
     //  char allarguments [argc];
-    if (argv < 0) {
+    if (argc ==0) {
         printf("u dont have any parameter");
     }
-    for (int i = 1; i < argc; i++) {
+    for (int k = 1; k < argc; k++) {
         //
-        if (strcmp(argv[i], "--debug")==0) {
+        if (strcmp(argv[k], "--debug")==0) {
             //call program , option
             runOption = "debug";
-            char debugOption;
+            char debugOption = 0;
             char i, l, b, s, r, q;
             scanf("%c", debugOption);
 
