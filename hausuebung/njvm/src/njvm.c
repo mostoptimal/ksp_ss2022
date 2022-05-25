@@ -1,31 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <getopt.h>
 #include "stack.h"
 #include "programs.h"
 #include "opCodes.h"
 #include "instructions.h" //Contains VM Instructions
 
 #define DEBUG
-#define FORMAT "NJBF"
+
 char *runOption;
 FILE *fp;
 unsigned int instruction;
 int *sda; //static Data Area
-char *formatValue;
 int version;
-int instructionNumber;
-int variablesNumber;
-int sdaCounter = 0;
+int numberOfInstructions;
+int numberOfVariables;
+int sdaIndex = 0;
 int pc = 0;
-int sp=0;
 unsigned int *allInstruct;
 unsigned int *allVariable;
 
-//char filename[] = "t.bin";
-char error_msg[256];
-int read_len = 0;
 /** todo list
  * 1)  run instruction testen
  * 2) execute testen
@@ -36,118 +30,120 @@ int read_len = 0;
    */
 
 void execute(unsigned int instruct, int immediate) {
-    int a, b, res, target;
-    int jmpTarget = immediate;
-    instruct=SIGN_EXTEND(instruct);
+    int a, b, res;
+    int target = immediate;
+    unsigned int IR = (instruct >> 24);
 
-    switch (instruct) {
-        case 0://HALT
+    switch (IR) {
+        case HALT://HALT
             break;
-        case 1://PUSHC
+        case PUSHC://PUSHC
             printf("PUSHC[ %d ]", instruct);
             push(instruct);
 
-        case 2://ADD
+        case ADD://ADD
             a = pop();
             b = pop();
             a = a + b;
             printf("ADD %d + %d", a, b);
             push(a);
 
-        case 3://SUB
+        case SUB://SUB
             a = pop();
             b = pop();
             a = a - b;
             printf("SUB %d - %d", a, b);
             push(a);
 
-        case 4://MUL
+        case MUL://MUL
             a = pop();
             b = pop();
             a = a * b;
             printf("MUL %d * %d", a, b);
             push(a);
 
-        case 5://DIV
+        case DIV://DIV
             a = pop();
             b = pop();
             a = a / b;
             printf("DIV %d / %d", a, b);
             push(a);
 
-        case 6://MOD
+        case MOD://MOD
             a = pop();
             b = pop();
             a = a % b;
             printf("MOD %d %d", a, b);
             push(a);
 
-            //case 11: //PUSHG
+            case PUSHG: //PUSHG
             //a = sda[n];
             //pushg < n > (a);
 
-        case 17://eq
+        case EQ://eq
             a = pop();
             b = pop();
             res = equal(a, b);
             push(res);
 
-        case 18://ne
+        case NE://ne
             a = pop();
             b = pop();
             res = nequal(a, b);
             push(res);
 
-        case 19://lt
+        case LT://lt
             a = pop();
             b = pop();
             res = lessThan(a, b);
             push(res);
 
-        case 20://le
+        case LE://le
             a = pop();
             b = pop();
             res = lessEqual(a, b);
             push(res);
 
-        case 21://gt
+        case GT://gt
             a = pop();
             b = pop();
             res = greaterThan(a, b);
             push(res);
 
-        case 22://ge
+        case GE://ge
             a = pop();
             b = pop();
             res = greaterEqual(a, b);
             push(res);
 
-        case 23://jmp <target>
-            pc = jump(jmpTarget);
+        case JMP://jmp <target>
+            pc = jump(target);
 
-        case 24://brf <target>
+        case BRF://brf <target>
             b = pop();
-            pc = branchFalse(b, target);
+            if(!b) pc=target;
+            //pc = branchFalse(b, target);
 
-        case 25://brt <target>
+        case BRT://brt <target>
             b = pop();
-            pc = branchTrue(b, target);
+            if(b) pc=target;
+            //pc = branchTrue(b, target);
 
         case CALL:
-             //inemediate werte instruction
-             push(pc);
-             pc = immediate;
+            //inemediate werte instruction
+            push(pc);
+            pc = immediate;
             // pc = jump()
             //  instruction anrufen
 
         case RET:
-           pc = pop();
-        case DROP:
-        {
-           int k =0;
-           while(k<immediate){
-             pop();
-           ++k;
+            pc = pop();
+
+        case DROP: {
+            int k = 0;
+            while (k < immediate) {
+                pop();
+                ++k;
             }
         }
 
@@ -163,46 +159,35 @@ void execute(unsigned int instruct, int immediate) {
             push(a);
 
         default:
-            printf("not on the List of the Instructions in VM...!!");
+            printf("not on the List of the Instructions in VM...!!\n");
     }
 }
 
 
-
-
- void RuninstructiontoAssemble(int porgrammemory[]){
+void RunInstructionToAssemble(unsigned int programMemory[]) {
     int i = 0;
-    while (porgrammemory[i]!=0){// HALT
-        execute(porgrammemory[i], 1);
+    while (programMemory[i] != 0) {// HALT
+        execute(programMemory[i], 1); //TODO 2nd Parameter
         i++;
         pc++;
     }
- }
+}
 
-/*unsigned int program_memory[] = { //Example
-        0x01000002, //program_memory[0]
-        0x01000003, //program_memory[1]
-        0x04000000, //program_memory[2]
-        0x01000005, //program_memory[3]
-        0x02000000, //program_memory[4]
-        0x08000000, //program_memory[5]
-        0x00000000  //program_memory[6]
-};*/
-void readInputInTerminal(char *argv[], int argc) {
+void readInputInTerminal(int argc, char *argv[]) {
     //read info for data
     //argumente
     //  char allarguments [argc];
-    if (argc ==0) {
+    if (argc == 0) {
         printf("u dont have any parameter");
     }
     for (int k = 1; k < argc; k++) {
         //
-        if (strcmp(argv[k], "--debug")==0) {
+        if (strcmp(argv[k], "--debug") == 0) {
             //call program , option
             runOption = "debug";
             char debugOption = 0;
-            char i, l, b, s, r, q;
-            scanf("%c", debugOption);
+
+            scanf("%c", &debugOption);
 
             switch (debugOption) {
 
@@ -239,38 +224,13 @@ void readInputInTerminal(char *argv[], int argc) {
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
     printf("Virtual Machine started\n");
-    //TODO: file path as Argument
+
     char *path;
     path = argv[1];
-    /**
-   if (argc >= 2) {
-        for (int i = 2; i < argc ; i++) {
-            if (strcmp(argv[i], "--version") == 0) {
-                printf("Ninja Virtual Machine (compiled %s at %s)\n", __DATE__, __TIME__);
-                return 0;
-            } else if (strcmp(argv[i], "--help") == 0) {
-                printf("Usage: ./njvm [option]\n");
-                printf("  --help          Show this help and exits\n");
-                printf("  --version       Show NJVM version and exits\n");
-                printf("  [file]          Loads the file and runs it (filename cannot start with \"--\"\n");
-                printf("  [file] --debug  Loads the file and runs it in debug mode\n");
-                return 0;
-            } else if (strcmp(argv[i], "--debug") == 0) {
-                //debug = 1;
-            } else {
-                printf("unknown argument '%s', try './njvm --help'", argv[1]);
-                return 1;
-            }
-        }
-
-    }
-// to do later
-#define DEBUG
-*/
 
     fp = fopen(path, "r");
 
-    printf("after fopen() before if NULL \n");
+    //printf("after fopen() before if NULL \n");
     if (fp == NULL) {
         perror("Error File Open!!\n");
         exit(1);
@@ -278,55 +238,57 @@ int main(int argc, char *argv[]) {
 
     /** 1st Step: read the format of Binary File "NJBF" */
     //1) Read the first 4 bytes of the file.
-    //fscanf(fp, "%s", strFormatIdentifier);
+
     char *njbf = (char *) malloc(sizeof(char) * 4);
-    int s1 = fread(njbf, sizeof(char), 4, fp); // streamfile speicher les 4 premiers bytes Format
-    printf("das ist %d\n", s1);
+    fread(njbf, sizeof(char), 4, fp); // streamfile speicher les 4 premiers bytes Format
+    //printf("das ist %d\n", s1);
 
     if (strcmp(njbf, "NJBF") == 0) {
-        printf("Format is Correct :) \n");
+        //printf("Format is Correct :) \n");
     } else {
-        printf("Format is inCorrect :( !!!");
+        //printf("Format is inCorrect :( !!!");
         exit(1);
     }
 
-    printf("after fread(&x, 1, 1, fp);\n");
+    //printf("after fread(&x, 1, 1, fp);\n");
 
     /** 2nd Step: Read the version number. **********/
     //2) Read the version number.
-    printf("2nd Step\n");
+    //printf("2nd Step\n");
     fread(&version, sizeof(int), 1, fp);
-    printf("after 2nd fread()\n");
+    //printf("after 2nd fread()\n");
     if (version != 2) {
-        printf("the file does not have the right Version, %d \n", version);
+        printf("Error: file %s",path," has wrong version number %d\n", version);
         exit(1);
     } else {
-        printf("Version is right :)\n");
+        //printf("Version is right :)\n");
     }
-    printf("after if version \n");
+    //printf("after if version \n");
 
     /** 3rd Step: Read the Number of Instructions */
     // 3) Read the number of instructions.
-    printf("3rd Step\n");
-    fread(&instructionNumber, sizeof(int), 1, fp);
-    printf("after fread(3)\n");
-    allInstruct = malloc(instructionNumber * sizeof(unsigned int));
+    //printf("3rd Step\n");
+    fread(&numberOfInstructions, sizeof(int), 1, fp);
+    //printf("after fread(3)\n");
+    allInstruct = malloc(numberOfInstructions * sizeof(unsigned int));
 
-    printf("instutNmber: %d\n", instructionNumber);
+    printf("instutNmber: %d\n", numberOfInstructions);
 
     /** 4th Step: read the Number of Global-Variables in SDA */
     //4) Read the number of variables in the static data area.
-    fread(&variablesNumber, sizeof(int), 1, fp);
+    fread(&numberOfVariables, sizeof(int), 1, fp);
 
-    if (variablesNumber > 0) {
-        printf("Number of Vars: %d\n", variablesNumber);
+    if (numberOfVariables > 0) {
+        printf("Number of Vars: %d\n", numberOfVariables);
         //SDA Allocate for Public Variables
-        sda = malloc(variablesNumber * sizeof(int));
+        sda = malloc(numberOfVariables * sizeof(int));
     }
 
     /**5th Step: reading the rest of File */
     //5) Read the rest of the file into the memory allocated in step 3).
-    //int fileReadValue = fread(allInstruct, sizeof(unsigned int), instructionNumber, fp);
+    int fileReadValue = fread(allInstruct, sizeof(unsigned int), numberOfInstructions, fp);
+    printf("fileReadVal: %d",fileReadValue);
+    RunInstructionToAssemble(allInstruct);
 
     if (fclose(fp) != 0) {
         perror("ERROR (fclose)");

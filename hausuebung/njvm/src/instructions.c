@@ -35,22 +35,28 @@ int greaterEqual(int v1, int v2) {
     else return 0;
 }
 
-int jump(int label ) {
+int jump(int label) {
 // zu implementieren
     return label;
 }
 
+/**
 int branchFalse(int condition, int target) {
-    if (condition == 0) return target;
+    int ziel=target;
+    if (condition == 0)
+        return ziel;
+
 }
 
 int branchTrue(int condition, int target) {
-    if (condition == 1) return target;
-}
+    int ziel=target;
+    if (condition == 1)
+        return ziel;
+}*/
 
- int call (int inmediate, int pc){
-    int alt_pc = pc ;
-    pc = inmediate;
+int call(int immediate, int pc) {
+    int alt_pc = pc;
+    pc = immediate;
     //execute ,....
     // kommst du zuruck
 

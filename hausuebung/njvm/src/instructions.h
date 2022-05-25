@@ -25,5 +25,6 @@ int branchFalse(int condition, int target);
 
 int branchTrue(int condition, int target);
 
- int call ( int  tarjet, int pc);
+int call(int immediate, int pc);
+
 #endif //HAUSUEBUNG_INSTRUCTIONS_H
