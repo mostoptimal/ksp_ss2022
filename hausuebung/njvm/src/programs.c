@@ -54,3 +54,13 @@ unsigned int program_simpleIF[]={
         (PUSHC<<24),
         (EQ<<24)
 };
+
+unsigned int program_memory[] = { //Example
+        0x01000002, //program_memory[0]
+        0x01000003, //program_memory[1]
+        0x04000000, //program_memory[2]
+        0x01000005, //program_memory[3]
+        0x02000000, //program_memory[4]
+        0x08000000, //program_memory[5]
+        0x00000000  //program_memory[6]
+};

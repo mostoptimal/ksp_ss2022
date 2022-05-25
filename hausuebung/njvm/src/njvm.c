@@ -7,8 +7,8 @@
 #include "opCodes.h"
 #include "instructions.h" //Contains VM Instructions
 
-#define FORMAT "NJBF"
-char* runoption;
+
+char *runOption;
 FILE *fp;
 unsigned int instruction;
 int *sda; //static Data Area
@@ -126,32 +126,24 @@ void execute(unsigned int instruct, int immediate) {
     }
 }
 
-/*unsigned int program_memory[] = { //Example
-        0x01000002, //program_memory[0]
-        0x01000003, //program_memory[1]
-        0x04000000, //program_memory[2]
-        0x01000005, //program_memory[3]
-        0x02000000, //program_memory[4]
-        0x08000000, //program_memory[5]
-        0x00000000  //program_memory[6]
-};*/
+
 void readInputInTerminal(char *argv[], int argc) {
     //read info for data
     //argumente
     //  char allarguments [argc];
-    if (argv < 0) {
+    if (argc < 1) {
         printf("u dont have any parameter");
     }
     for (int i = 1; i < argc; i++) {
         //
-        if (strcmp(argv[i], "--debug")==0) {
+        if (strcmp(argv[i], "--debug") == 0) {
             //call program , option
-            runoption = "debug";
-            char debugoption;
+            runOption = "debug";
+            char debugOption;
             char i, l, b, s, r, q;
-            scanf("%c", debugoption);
+            scanf("%c", debugOption);
 
-            switch (debugoption) {
+            switch (debugOption) {
 
                 case 'i':
                     break;
@@ -185,9 +177,11 @@ void readInputInTerminal(char *argv[], int argc) {
 
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
+    printf("Virtual Machine started\n");
     //TODO: file path as Argument
     char *path;
-    path=argv[1];
+    path = argv[1];
+    /**
    if (argc >= 2) {
         for (int i = 2; i < argc ; i++) {
             if (strcmp(argv[i], "--version") == 0) {
@@ -209,7 +203,7 @@ int main(int argc, char *argv[]) {
         }
 
     }
-
+*/
 
     fp = fopen(path, "r");
 
@@ -263,70 +257,17 @@ int main(int argc, char *argv[]) {
 
     if (variablesNumber > 0) {
         printf("Number of Vars: %d\n", variablesNumber);
-        sda = malloc(variablesNumber * sizeof(int));
         //SDA Allocate for Public Variables
+        sda = malloc(variablesNumber * sizeof(int));
     }
 
     /**5th Step: reading the rest of File */
     //5) Read the rest of the file into the memory allocated in step 3).
     //int fileReadValue = fread(allInstruct, sizeof(unsigned int), instructionNumber, fp);
 
-
-    // now reading the Code from file
-    /**
-    while (fread(c, 1, 4, fp) != EOF) {
-        instruction = program_memory[pc];
-        printf("PC = %d   ", instruction);
-
-        printf("OPCode = %d \n", opcode);
-        pc++;
-        opcode = program_1_memory[pc];
-        execute(instruction);
-    }
-*/
-
     if (fclose(fp) != 0) {
         perror("ERROR (fclose)");
     }
+    printf("Virtual Machine stopped\n");
     return 0;
 }
-
-
-/*
-int main(int argc, char *argv[]) {
-    //file Operations......
-    FILE *fp;
-    fp = fopen("./xy.z", "w+");
-    if (fp == NULL) {
-        printf("...");
-        exit(99);
-    }
-    fprintf(fp, "This is testing for fprintf...\n");
-    fputs("This is testing for fputs...\n", fp);
-    fclose(fp);
-    //file Operations End....
-    int pc = 0;
-    unsigned int opcode = program_1_memory[0];
-    while (opcode != HALT) {
-        instruction = program_memory[pc];
-        printf("PC = %d   ", instruction);
-
-        printf("OPCode = %d \n", opcode);
-        pc++;
-        opcode = program_1_memory[pc];
-        execute(instruction);
-    }
-
-*/
-/*
- *  int value;
-    print_stack();
-    push(5);
-    print_stack();
-    push(3);
-    print_stack();
-    value = pop();
-    print_stack();*//*
-
-    return 0;
-}*/
