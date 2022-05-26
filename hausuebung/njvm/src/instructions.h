@@ -19,7 +19,11 @@ int greaterThan(int v1, int v2);
 
 int greaterEqual(int v1, int v2);
 
+int readInt(int imm);
+
 int jump(int label);
+
+
 
 int branchFalse(int condition, int target);
 

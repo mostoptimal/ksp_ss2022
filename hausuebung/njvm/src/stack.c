@@ -23,16 +23,18 @@ void push(unsigned int x) {
 }
 
 int pop(void) {
-    printf("\n%4s-> dec stack pointer %d -> \n", __func__, sp);
-    sp--;
+    int tmp;
     if (sp == 0)
         printf("Error Stack underFlow :( !!\n");
+
     else {
+        printf("\n%4s-> dec stack pointer %d -> \n", __func__, sp);
+        sp--;
         printf("%d\n", sp);
-        int tmp = stack[sp];
+        tmp = stack[sp];
         printf("\n%4s-> popping %d from stack @sp %d\n", __func__, tmp, sp);
-        return tmp;
     }
+    return tmp;
 }
 
 void print_stack(void) {

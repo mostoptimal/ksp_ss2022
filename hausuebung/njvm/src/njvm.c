@@ -77,7 +77,7 @@ void execute(unsigned int instruct, int immediate) {
             printf("MOD %d %d", a, b);
             push(a);
 
-            case PUSHG: //PUSHG
+        case PUSHG: //PUSHG
             //a = sda[n];
             //pushg < n > (a);
 
@@ -122,14 +122,22 @@ void execute(unsigned int instruct, int immediate) {
 
         case BRF://brf <target>
             b = pop();
-            if(!b) pc=target;
+            if (!b) pc = target;
             //pc = branchFalse(b, target);
 
         case BRT://brt <target>
             b = pop();
-            if(b) pc=target;
+            if (b) pc = target;
             //pc = branchTrue(b, target);
 
+        case RDINT:
+            push(immediate);
+        case WRINT:
+            a = pop();
+        case RDCHR:
+            push(immediate);
+        case WRCHR:
+            a = pop();
         case CALL:
             //inemediate werte instruction
             push(pc);
@@ -172,6 +180,7 @@ void RunInstructionToAssemble(unsigned int programMemory[]) {
         i++;
         pc++;
     }
+    print_stack();
 }
 
 void readInputInTerminal(int argc, char *argv[]) {
@@ -179,7 +188,7 @@ void readInputInTerminal(int argc, char *argv[]) {
     //argumente
     //  char allarguments [argc];
     if (argc == 0) {
-        printf("u dont have any parameter");
+        //printf("u dont have any parameter");
     }
     for (int k = 1; k < argc; k++) {
         //
@@ -259,7 +268,7 @@ int main(int argc, char *argv[]) {
     fread(&version, sizeof(int), 1, fp);
     //printf("after 2nd fread()\n");
     if (version != 2) {
-        printf("Error: file %s",path," has wrong version number %d\n", version);
+        printf("Error: file %s has wrong version number %d\n", path, version);
         exit(1);
     } else {
         //printf("Version is right :)\n");
@@ -273,7 +282,7 @@ int main(int argc, char *argv[]) {
     //printf("after fread(3)\n");
     allInstruct = malloc(numberOfInstructions * sizeof(unsigned int));
 
-    printf("instutNmber: %d\n", numberOfInstructions);
+    //printf("instutNmber: %d\n", numberOfInstructions);
 
     /** 4th Step: read the Number of Global-Variables in SDA */
     //4) Read the number of variables in the static data area.
@@ -287,8 +296,8 @@ int main(int argc, char *argv[]) {
 
     /**5th Step: reading the rest of File */
     //5) Read the rest of the file into the memory allocated in step 3).
-    int fileReadValue = fread(allInstruct, sizeof(unsigned int), numberOfInstructions, fp);
-    printf("fileReadVal: %d",fileReadValue);
+    fread(allInstruct, sizeof(unsigned int), numberOfInstructions, fp);
+    //printf("fileReadVal: %d",fileReadValue);
     RunInstructionToAssemble(allInstruct);
 
     if (fclose(fp) != 0) {

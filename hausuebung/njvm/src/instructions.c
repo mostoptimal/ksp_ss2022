@@ -40,6 +40,10 @@ int jump(int label) {
     return label;
 }
 
+int readInt(int imm){
+
+}
+
 /**
 int branchFalse(int condition, int target) {
     int ziel=target;
