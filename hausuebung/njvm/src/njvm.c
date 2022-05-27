@@ -8,7 +8,7 @@
 #include "instructions.h" //Contains VM Instructions
 
 #define DEBUG
-
+#define FORMAT "NJBF"
 char *runOption;
 FILE *fp;
 unsigned int instruction;
@@ -78,8 +78,29 @@ void execute(unsigned int instruct, int immediate) {
             push(a);
 
         case PUSHG: //PUSHG
-            //a = sda[n];
-            //pushg < n > (a);
+        // push n element from statick data area to Stack
+        push(sda[immediate]);
+
+        case   POPG:
+            //popg <n> → ... value -> ... - Der Wert value wird in der SDA als n-tes Element
+            //gespeichert
+            // pop element from stack
+            // push a element in position n in SDA
+            a=pop();
+            a=sda[immediate];
+
+        case ASF://ASF 13
+        //asf <n> Allocate Stack Frame — n gibt die Anzahl der zu reservierenden
+            //lokalen Variablen an
+            asf(immediate);
+
+        case RSF:
+            rsf();
+
+        case PUSHL:
+
+            push(fp + immediate);
+        case POPL:
 
         case EQ://eq
             a = pop();

@@ -9,7 +9,7 @@
 //Stack Begin---------------------------------------------------------------------
 int sp = 0;
 int stack[MAX_ITEMS];
-
+int frptr=0;
 void push(unsigned int x) {
     printf("\n%4s-> pushing %d onto stack @sp %d\n", __func__, x, sp);
     if (sp > MAX_ITEMS) {
@@ -36,7 +36,15 @@ int pop(void) {
     }
     return tmp;
 }
-
+void asf( int n){
+    push(frptr);
+    frptr = sp;
+    sp = sp + n;
+}
+void rsf(){
+    sp = frptr;
+    frptr = pop();
+}
 void print_stack(void) {
     printf("\n   Stack\n");
     printf(".-------+--------.\n");

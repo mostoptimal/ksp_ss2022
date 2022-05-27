@@ -9,5 +9,9 @@ int pop(void);
 void pushg(int x);
 int popg(void);
 void print_stack(void);
+void asf(int n);
+void rsf();
+void pushl(int n);
+void popl(int n);
 #endif //HAUSUEBUNG_STACK_H
 
