@@ -45,6 +45,12 @@ void rsf(){
     sp = frptr;
     frptr = pop();
 }
+void pushl(int immediate){
+    push(stack[frptr + immediate]);
+}
+void popl(int immediate){
+    stack[frptr + immediate] = pop();
+}
 void print_stack(void) {
     printf("\n   Stack\n");
     printf(".-------+--------.\n");

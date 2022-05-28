@@ -11,7 +11,7 @@ int popg(void);
 void print_stack(void);
 void asf(int n);
 void rsf();
-void pushl(int n);
-void popl(int n);
+void pushl(int element);
+void popl(int element);
 #endif //HAUSUEBUNG_STACK_H
 

@@ -99,9 +99,9 @@ void execute(unsigned int instruct, int immediate) {
 
         case PUSHL:
 
-            push(fp + immediate);
+            pushl(immediate);
         case POPL:
-
+          popl(immediate);
         case EQ://eq
             a = pop();
             b = pop();
