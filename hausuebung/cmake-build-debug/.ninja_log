@@ -1,13 +1,7 @@
 # ninja log v5
-14	109	1653389576066542887	CMakeFiles/hausuebung.dir/njvm/src/instructions.c.o	3d4a7267a783be9
-0	14	1653294494277015641	build.ninja	9b807b7f23ae4a4a
-44	64	1653408398614947985	hausuebung	7c685302f310bb6d
-0	27	1653125123039508474	CMakeFiles/hausuebung.dir/njvm/src/stack.c.o	c6c54efdc811d8e
-0	26	1653389706447305049	CMakeFiles/hausuebung.dir/njvm/src/programs.c.o	4c895600c891698d
-0	44	1653408398594947555	CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o	77f87da7563d2431
-0	38	1653409759592179163	CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o	77f87da7563d2431
-38	57	1653409759612179568	hausuebung	7c685302f310bb6d
 2	28	1653460833891280672	CMakeFiles/hausuebung.dir/njvm/src/instructions.c.o	3d4a7267a783be9
-1	37	1653460833899280850	CMakeFiles/hausuebung.dir/njvm/src/stack.c.o	c6c54efdc811d8e
-1	51	1653460833915281206	CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o	77f87da7563d2431
+0	14	1653679096722169568	build.ninja	9b807b7f23ae4a4a
 51	76	1653460833939281740	hausuebung	7c685302f310bb6d
+1	37	1653460833899280850	CMakeFiles/hausuebung.dir/njvm/src/stack.c.o	c6c54efdc811d8e
+0	26	1653389706447305049	CMakeFiles/hausuebung.dir/njvm/src/programs.c.o	4c895600c891698d
+1	51	1653460833915281206	CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o	77f87da7563d2431

@@ -34,6 +34,16 @@
 #define PUSHR 29
 #define POPR 30
 #define DUP 31
+#define NEW 32
+#define GETF 33
+#define PUTF 34
+#define NEWA 35
+#define GETFA 36
+#define PUTFA 37
+#define GETSZ 38
+#define PUSHN 39
+#define REFEQ 40
+#define REFNE 41
 #define OP_CODE(instr) ((instr)>>24)
 #define IMMEDIATE(x) ((x)&0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))

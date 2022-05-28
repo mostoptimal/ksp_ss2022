@@ -3,36 +3,95 @@
 //
 #include <stdio.h>
 #include "instructions.h"
-
-int equal(int v1, int v2) {
-    if (v1 == v2) {//or v1-v2==0
-        return 1;//1 for True
-    } else return 0;//0 for False
+#include "stack.h"
+int a,b,res;
+void add(){
+    a = pop();
+    b = pop();
+    a = a + b;
+    push(a);
+    printf("ADD %d + %d", a, b);
 }
 
-int nequal(int v1, int v2) {
-    if (equal(v1, v2) == 0) return 1;
-    else return 0;
+void sub(){
+    a = pop();
+    b = pop();
+    a = a - b;
+    printf("SUB %d - %d", a, b);
+    push(a);
 }
 
-int lessThan(int v1, int v2) {
-    if (v2 - v1 > 0) return 1;
-    else return 0;
+void mul(){
+    a = pop();
+    b = pop();
+    a = a * b;
+    printf("MUL %d * %d", a, b);
+    push(a);
 }
 
-int lessEqual(int v1, int v2) {
-    if (v2 >= v1) return 1;
-    else return 0;
+void divid(){
+    a = pop();
+    b = pop();
+    a = a / b;
+    printf("DIV %d / %d", a, b);
+    push(a);
 }
 
-int greaterThan(int v1, int v2) {
-    if (v1 - v2 > 0) return 1;
-    else return 0;
+void mod(){
+    a = pop();
+    b = pop();
+    a = a % b;
+    printf("MOD %d %d", a, b);
+    push(a);
 }
 
-int greaterEqual(int v1, int v2) {
-    if (v1 - v2 >= 0) return 1;
-    else return 0;
+void equal() {
+    a = pop();
+    b = pop();
+    if (a == b) {//or v1-v2==0
+        res= 1;//1 for True
+    } else res= 0;//0 for False
+    push(res);
+}
+
+void nequal() {
+    a = pop();
+    b = pop();
+    if (a!=b) res= 1;
+    else res= 0;
+    push(res);
+}
+
+void lessThan() {
+    a = pop();
+    b = pop();
+    if (b - a > 0) res= 1;
+    else res= 0;
+    push(res);
+}
+
+void lessEqual() {
+    a = pop();
+    b = pop();
+    if (b >= a) res= 1;
+    else res= 0;
+    push(res);
+}
+
+void greaterThan() {
+    a = pop();
+    b = pop();
+    if (a - b > 0) res= 1;
+    else res= 0;
+    push(res);
+}
+
+void greaterEqual() {
+    a = pop();
+    b = pop();
+    if (a - b >= 0) res= 1;
+    else res= 0;
+    push(res);
 }
 
 int jump(int label) {
@@ -40,9 +99,26 @@ int jump(int label) {
     return label;
 }
 
-int readInt(int imm){
+void readInt(){
+    int input=0;
+    scanf("%d",&input);
+    push(input);
 
 }
+void readChar(){
+    char inputC;
+    scanf("%c",&inputC);
+    push(inputC);
+}
+int writeInt(){
+    int output=pop();
+    return output;
+}
+char writeChar(){
+    char output=pop();
+    return output;
+}
+
 
 /**
 int branchFalse(int condition, int target) {

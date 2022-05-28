@@ -3,17 +3,19 @@
 #include <string.h>
 #include <getopt.h>
 #include "stack.h"
+#include "execute.h"
 #include "programs.h"
 #include "opCodes.h"
 #include "instructions.h" //Contains VM Instructions
 
 #define DEBUG
-#define FORMAT "NJBF"
+
 char *runOption;
-FILE *fp;
+FILE *filePointer;
 unsigned int instruction;
 int *sda; //static Data Area
 int version;
+int IR = 0;
 int numberOfInstructions;
 int numberOfVariables;
 int sdaIndex = 0;
@@ -30,6 +32,20 @@ unsigned int *allVariable;
  *  6) debbug implementieren als option ,
    */
 
+/*
+ * */
+void pushg(int index) {
+    int value = sda[index];
+    push(value);
+}
+
+void popg(int index) {
+    int value = pop();
+    sda[index] = value;
+}
+
+/**
+ * */
 void execute(unsigned int instruct, int immediate) {
     int a, b, res;
     int target = immediate;
@@ -39,116 +55,64 @@ void execute(unsigned int instruct, int immediate) {
         case HALT://HALT
             break;
         case PUSHC://PUSHC
-            printf("PUSHC[ %d ]", instruct);
+            printf("PUSHC %d", instruct);
             push(instruct);
 
         case ADD://ADD
-            a = pop();
-            b = pop();
-            a = a + b;
-            printf("ADD %d + %d", a, b);
-            push(a);
-
+            add();
         case SUB://SUB
-            a = pop();
-            b = pop();
-            a = a - b;
-            printf("SUB %d - %d", a, b);
-            push(a);
-
+            sub();
         case MUL://MUL
-            a = pop();
-            b = pop();
-            a = a * b;
-            printf("MUL %d * %d", a, b);
-            push(a);
-
+            mul();
         case DIV://DIV
-            a = pop();
-            b = pop();
-            a = a / b;
-            printf("DIV %d / %d", a, b);
-            push(a);
-
+            divid();
         case MOD://MOD
-            a = pop();
-            b = pop();
-            a = a % b;
-            printf("MOD %d %d", a, b);
-            push(a);
-
+            mod();
         case PUSHG: //PUSHG
-        // push n element from statick data area to Stack
-        push(sda[immediate]);
+            // push n element from static data area to Stack
+            push(sda[immediate]);
 
-        case   POPG:
+        case POPG:
             //popg <n> → ... value -> ... - Der Wert value wird in der SDA als n-tes Element
             //gespeichert
             // pop element from stack
             // push a element in position n in SDA
-            a=pop();
-            a=sda[immediate];
+            a = pop();
+            a = sda[immediate];
 
         case ASF://ASF 13
-        //asf <n> Allocate Stack Frame — n gibt die Anzahl der zu reservierenden
+            //asf <n> Allocate Stack Frame — n gibt die Anzahl der zu reservierenden
             //lokalen Variablen an
             asf(immediate);
-
         case RSF:
             rsf();
-
         case PUSHL:
-
             push(fp + immediate);
         case POPL:
 
         case EQ://eq
-            a = pop();
-            b = pop();
-            res = equal(a, b);
-            push(res);
-
+            equal();
         case NE://ne
-            a = pop();
-            b = pop();
-            res = nequal(a, b);
-            push(res);
-
+            nequal();
         case LT://lt
-            a = pop();
-            b = pop();
-            res = lessThan(a, b);
-            push(res);
-
+            lessThan();
         case LE://le
-            a = pop();
-            b = pop();
-            res = lessEqual(a, b);
-            push(res);
-
+            lessEqual();
         case GT://gt
-            a = pop();
-            b = pop();
-            res = greaterThan(a, b);
-            push(res);
-
+            greaterThan();
         case GE://ge
-            a = pop();
-            b = pop();
-            res = greaterEqual(a, b);
-            push(res);
-
+            greaterEqual();
         case JMP://jmp <target>
             pc = jump(target);
 
         case BRF://brf <target>
             b = pop();
-            if (!b) pc = target;
+            if (b == 0) pc = target;
             //pc = branchFalse(b, target);
 
         case BRT://brt <target>
             b = pop();
-            if (b) pc = target;
+            if (b == 1) pc = target;
             //pc = branchTrue(b, target);
 
         case RDINT:
@@ -187,7 +151,16 @@ void execute(unsigned int instruct, int immediate) {
             a = pop();
             push(a);
             push(a);
-
+        case NEW:
+        case GETF:
+        case PUTF:
+        case NEWA:
+        case GETFA:
+        case PUTFA:
+        case GETSZ:
+        case PUSHN:
+        case REFEQ:
+        case REFNE:
         default:
             printf("not on the List of the Instructions in VM...!!\n");
     }
@@ -256,72 +229,53 @@ void readInputInTerminal(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     printf("Virtual Machine started\n");
 
-    char *path;
-    path = argv[1];
+    char *fileName;
+    fileName = argv[1];
 
-    fp = fopen(path, "r");
+    filePointer = fopen(fileName, "r");
 
     //printf("after fopen() before if NULL \n");
-    if (fp == NULL) {
-        perror("Error File Open!!\n");
+    if (filePointer == NULL) {
+        printf("Error: cannot open code file '%s'\n", fileName);
         exit(1);
     }
 
     /** 1st Step: read the format of Binary File "NJBF" */
     //1) Read the first 4 bytes of the file.
-
     char *njbf = (char *) malloc(sizeof(char) * 4);
-    fread(njbf, sizeof(char), 4, fp); // streamfile speicher les 4 premiers bytes Format
-    //printf("das ist %d\n", s1);
-
-    if (strcmp(njbf, "NJBF") == 0) {
-        //printf("Format is Correct :) \n");
-    } else {
-        //printf("Format is inCorrect :( !!!");
+    fread(njbf, sizeof(char), 4, filePointer);
+    if (strcmp(njbf, "NJBF") != 0) {
+        //printf("Format is NOT Correct :) \n");
         exit(1);
     }
-
-    //printf("after fread(&x, 1, 1, fp);\n");
 
     /** 2nd Step: Read the version number. **********/
     //2) Read the version number.
-    //printf("2nd Step\n");
-    fread(&version, sizeof(int), 1, fp);
-    //printf("after 2nd fread()\n");
+    fread(&version, sizeof(int), 1, filePointer);
     if (version != 2) {
-        printf("Error: file %s has wrong version number %d\n", path, version);
+        printf("Error: file %s has wrong version number %d\n", fileName, version);
         exit(1);
-    } else {
-        //printf("Version is right :)\n");
     }
-    //printf("after if version \n");
 
     /** 3rd Step: Read the Number of Instructions */
     // 3) Read the number of instructions.
-    //printf("3rd Step\n");
-    fread(&numberOfInstructions, sizeof(int), 1, fp);
-    //printf("after fread(3)\n");
+    fread(&numberOfInstructions, sizeof(int), 1, filePointer);
     allInstruct = malloc(numberOfInstructions * sizeof(unsigned int));
-
-    //printf("instutNmber: %d\n", numberOfInstructions);
 
     /** 4th Step: read the Number of Global-Variables in SDA */
     //4) Read the number of variables in the static data area.
-    fread(&numberOfVariables, sizeof(int), 1, fp);
-
+    fread(&numberOfVariables, sizeof(int), 1, filePointer);
     if (numberOfVariables > 0) {
-        printf("Number of Vars: %d\n", numberOfVariables);
         //SDA Allocate for Public Variables
         sda = malloc(numberOfVariables * sizeof(int));
     }
 
     /**5th Step: reading the rest of File */
     //5) Read the rest of the file into the memory allocated in step 3).
-    fread(allInstruct, sizeof(unsigned int), numberOfInstructions, fp);
-    //printf("fileReadVal: %d",fileReadValue);
+    fread(allInstruct, sizeof(unsigned int), numberOfInstructions, filePointer);
     RunInstructionToAssemble(allInstruct);
-
-    if (fclose(fp) != 0) {
+    /**6th Step: Closing the File */
+    if (fclose(filePointer) != 0) {
         perror("ERROR (fclose)");
     }
     printf("Virtual Machine stopped\n");

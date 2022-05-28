@@ -6,8 +6,6 @@
 #define HAUSUEBUNG_STACK_H
 void push(unsigned int x);
 int pop(void);
-void pushg(int x);
-int popg(void);
 void print_stack(void);
 void asf(int n);
 void rsf();

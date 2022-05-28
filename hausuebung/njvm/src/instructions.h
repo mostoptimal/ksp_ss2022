@@ -5,21 +5,31 @@
 #ifndef HAUSUEBUNG_INSTRUCTIONS_H
 #define HAUSUEBUNG_INSTRUCTIONS_H
 
-int equal(int v1, int v2);
+void add();
+
+void sub();
+
+void mul();
+
+void divid();
+
+void mod();
+
+void equal();
 
 int jump(int label);
 
-int nequal(int v1, int v2);
+void nequal();
 
-int lessThan(int v1, int v2);
+void lessThan();
 
-int lessEqual(int v1, int v2);
+void lessEqual();
 
-int greaterThan(int v1, int v2);
+void greaterThan();
 
-int greaterEqual(int v1, int v2);
+void greaterEqual();
 
-int readInt(int imm);
+void readInt();
 
 int jump(int label);
 
