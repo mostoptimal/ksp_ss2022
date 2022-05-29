@@ -2,6 +2,7 @@
 // Created by mohamad on 4/25/22.
 //
 #include <stdio.h>
+#include <stdlib.h>
 #include "stack.h"
 
 #define MAX_ITEMS 100
@@ -9,8 +10,9 @@
 //Stack Begin---------------------------------------------------------------------
 int sp = 0;
 unsigned int stack[MAX_ITEMS];
-int frptr=0;
-void push(unsigned int x) {
+int frptr = 0;
+
+void push(int x) {
     if (sp > MAX_ITEMS) {
         printf("Error Stack Overflow :( \n");
     } else {
@@ -22,30 +24,36 @@ void push(unsigned int x) {
 
 int pop(void) {
     unsigned int tmp;
-    if (sp < 0)
+    if (sp < 0) {
         printf("Error Stack underFlow :( !!\n");
-    else {
+        exit(1);
+    } else {
         sp--;
         tmp = stack[sp];
         printf("POP %d\n", tmp);
         return tmp;
     }
 }
-void asf( int n){
+
+void asf(int n) {
     push(frptr);
     frptr = sp;
     sp = sp + n;
 }
-void rsf(){
+
+void rsf() {
     sp = frptr;
     frptr = pop();
 }
-void pushl(int immediate){
+
+void pushl(int immediate) {
     push(stack[frptr + immediate]);
 }
-void popl(int immediate){
+
+void popl(int immediate) {
     stack[frptr + immediate] = pop();
 }
+
 void print_stack(void) {
     printf("\n   Stack\n");
     printf(".-------+--------.\n");

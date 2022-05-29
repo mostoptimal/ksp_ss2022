@@ -22,7 +22,8 @@ int sdaIndex = 0;
 int pc = 0;
 unsigned int *allInstruct;
 unsigned int *allVariable;
-
+int rv=0;
+int immediate=0;
 /** todo list
  * 1)  run instruction testen
  * 2) execute testen
@@ -46,18 +47,16 @@ void popg(int index) {
 
 /**
  * */
-void execute(unsigned int instruct, int immediate) {
+void execute(int instruct) {
     int a, b;
-    int target = immediate;
-    IR = (instruct >> 24);
+    immediate= SIGN_EXTEND(instruct);
+    IR = (instruct >> 24); /* 1. musn't shift*/
 
     switch (IR) {
         case HALT://HALT
             break;
         case PUSHC://PUSHC
-            printf("PUSHC %d", instruct);
-            push(instruct);
-
+            push(immediate);
         case ADD://ADD
             add();
         case SUB://SUB
@@ -78,18 +77,17 @@ void execute(unsigned int instruct, int immediate) {
             // pop element from stack
             // push a element in position n in SDA
             a = pop();
-            a = sda[immediate];
+            sda[immediate] = a;
 
         case ASF://ASF 13
-            //asf <n> Allocate Stack Frame — n gibt die Anzahl der zu reservierenden
-            //lokalen Variablen an
+            //asf <n> Allocate Stack Frame — n gibt die Anzahl der zu reservierenden lokalen Variablen an
             asf(immediate);
         case RSF:
             rsf();
         case PUSHL:
             pushl(immediate);
         case POPL:
-          popl(immediate);
+            popl(immediate);
         case EQ://eq
             equal();
         case NE://ne
@@ -103,13 +101,13 @@ void execute(unsigned int instruct, int immediate) {
         case GE://ge
             greaterEqual();
         case JMP://jmp <target>
-            pc = jump(target);
+            pc = jump(immediate);
         case BRF://brf <target>
             b = pop();
-            if (b == 0) pc = target;
+            if (b == 0) pc = immediate;
         case BRT://brt <target>
             b = pop();
-            if (b == 1) pc = target;
+            if (b == 1) pc = immediate;
         case RDINT:
             readInt();
         case WRINT:
@@ -119,7 +117,7 @@ void execute(unsigned int instruct, int immediate) {
         case WRCHR:
             writeChar();
         case CALL:
-            call(immediate,pc);
+            call(immediate, pc);
         case RET:
             pc = pop();
         case DROP: {
@@ -130,9 +128,9 @@ void execute(unsigned int instruct, int immediate) {
             }
         }
         case PUSHR:
-
+            push(rv);
         case POPR:
-
+            rv=pop();
         case DUP:
             // sp +1
             // lege ich da die gleiche variable
@@ -150,15 +148,17 @@ void execute(unsigned int instruct, int immediate) {
         case REFEQ:
         case REFNE:
         default:
-            printf("Error: Unknown opcode %d\n",IR);
+            printf("Error: Unknown opcode %d\n", IR);
     }
 }
 
 
 void RunInstructionToAssemble(unsigned int programMemory[]) {
     int i = 0;
+
     while (programMemory[i] != 0) {// HALT
-        execute(programMemory[i], 1); //TODO 2nd Parameter
+
+        execute(programMemory[i]); //TODO 2nd Parameter
         i++;
         pc++;
     }

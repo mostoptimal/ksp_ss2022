@@ -4,7 +4,7 @@
 
 #ifndef HAUSUEBUNG_STACK_H
 #define HAUSUEBUNG_STACK_H
-void push(unsigned int x);
+void push(int x);
 int pop(void);
 void print_stack(void);
 void asf(int n);

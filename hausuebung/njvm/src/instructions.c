@@ -10,41 +10,41 @@ int a, b, res;
 void add() {
     a = pop();
     b = pop();
-    a = a + b;
-    push(a);
-    printf("ADD %d + %d", a, b);
+    res = a + b;
+    push(res);
+    printf("ADD %d + %d\n", a, b);
 }
 
 void sub() {
     a = pop();
     b = pop();
-    a = a - b;
-    printf("SUB %d - %d", a, b);
-    push(a);
+    res = a - b;
+    printf("SUB %d - %d\n", a, b);
+    push(res);
 }
 
 void mul() {
     a = pop();
     b = pop();
-    a = a * b;
-    printf("MUL %d * %d", a, b);
-    push(a);
+    res = a * b;
+    printf("MUL %d * %d\n", a, b);
+    push(res);
 }
 
 void divid() {
     a = pop();
     b = pop();
-    a = a / b;
-    printf("DIV %d / %d", a, b);
-    push(a);
+    res = a / b;
+    printf("DIV %d / %d\n", a, b);
+    push(res);
 }
 
 void mod() {
     a = pop();
     b = pop();
-    a = a % b;
-    printf("MOD %d %d", a, b);
-    push(a);
+    res = a % b;
+    printf("MOD %d %d\n", a, b);
+    push(res);
 }
 
 void equal() {
@@ -67,7 +67,7 @@ void nequal() {
 void lessThan() {
     a = pop();
     b = pop();
-    if (b - a > 0) res = 1;
+    if (a < b) res = 1;
     else res = 0;
     push(res);
 }
