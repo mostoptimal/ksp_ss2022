@@ -15,7 +15,7 @@ FILE *filePointer;
 unsigned int instruction;
 int *sda; //static Data Area
 int version;
-int IR = 0;
+unsigned int IR = 0;
 int numberOfInstructions;
 int numberOfVariables;
 int sdaIndex = 0;
@@ -47,9 +47,9 @@ void popg(int index) {
 /**
  * */
 void execute(unsigned int instruct, int immediate) {
-    int a, b, res;
+    int a, b;
     int target = immediate;
-    unsigned int IR = (instruct >> 24);
+    IR = (instruct >> 24);
 
     switch (IR) {
         case HALT://HALT
@@ -87,8 +87,6 @@ void execute(unsigned int instruct, int immediate) {
         case RSF:
             rsf();
         case PUSHL:
-            push(fp + immediate);
-
             pushl(immediate);
         case POPL:
           popl(immediate);
@@ -106,35 +104,24 @@ void execute(unsigned int instruct, int immediate) {
             greaterEqual();
         case JMP://jmp <target>
             pc = jump(target);
-
         case BRF://brf <target>
             b = pop();
             if (b == 0) pc = target;
-            //pc = branchFalse(b, target);
-
         case BRT://brt <target>
             b = pop();
             if (b == 1) pc = target;
-            //pc = branchTrue(b, target);
-
         case RDINT:
-            push(immediate);
+            readInt();
         case WRINT:
-            a = pop();
+            writeInt();
         case RDCHR:
-            push(immediate);
+            readChar();
         case WRCHR:
-            a = pop();
+            writeChar();
         case CALL:
-            //inemediate werte instruction
-            push(pc);
-            pc = immediate;
-            // pc = jump()
-            //  instruction anrufen
-
+            call(immediate,pc);
         case RET:
             pc = pop();
-
         case DROP: {
             int k = 0;
             while (k < immediate) {
@@ -142,7 +129,6 @@ void execute(unsigned int instruct, int immediate) {
                 ++k;
             }
         }
-
         case PUSHR:
 
         case POPR:
@@ -164,7 +150,7 @@ void execute(unsigned int instruct, int immediate) {
         case REFEQ:
         case REFNE:
         default:
-            printf("not on the List of the Instructions in VM...!!\n");
+            printf("Error: Unknown opcode %d\n",IR);
     }
 }
 

@@ -31,13 +31,18 @@ void greaterEqual();
 
 void readInt();
 
+void readChar();
+
+int writeInt();
+
+char writeChar();
+
 int jump(int label);
 
 
+//int branchFalse(int condition, int target);
 
-int branchFalse(int condition, int target);
-
-int branchTrue(int condition, int target);
+//int branchTrue(int condition, int target);
 
 int call(int immediate, int pc);
 

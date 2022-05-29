@@ -25,8 +25,8 @@ int pop(void) {
     if (sp < 0)
         printf("Error Stack underFlow :( !!\n");
     else {
-        tmp = stack[sp];
         sp--;
+        tmp = stack[sp];
         printf("POP %d\n", tmp);
         return tmp;
     }

@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include "instructions.h"
 #include "stack.h"
-int a,b,res;
-void add(){
+
+int a, b, res;
+
+void add() {
     a = pop();
     b = pop();
     a = a + b;
@@ -13,7 +15,7 @@ void add(){
     printf("ADD %d + %d", a, b);
 }
 
-void sub(){
+void sub() {
     a = pop();
     b = pop();
     a = a - b;
@@ -21,7 +23,7 @@ void sub(){
     push(a);
 }
 
-void mul(){
+void mul() {
     a = pop();
     b = pop();
     a = a * b;
@@ -29,7 +31,7 @@ void mul(){
     push(a);
 }
 
-void divid(){
+void divid() {
     a = pop();
     b = pop();
     a = a / b;
@@ -37,7 +39,7 @@ void divid(){
     push(a);
 }
 
-void mod(){
+void mod() {
     a = pop();
     b = pop();
     a = a % b;
@@ -49,48 +51,48 @@ void equal() {
     a = pop();
     b = pop();
     if (a == b) {//or v1-v2==0
-        res= 1;//1 for True
-    } else res= 0;//0 for False
+        res = 1;//1 for True
+    } else res = 0;//0 for False
     push(res);
 }
 
 void nequal() {
     a = pop();
     b = pop();
-    if (a!=b) res= 1;
-    else res= 0;
+    if (a != b) res = 1;
+    else res = 0;
     push(res);
 }
 
 void lessThan() {
     a = pop();
     b = pop();
-    if (b - a > 0) res= 1;
-    else res= 0;
+    if (b - a > 0) res = 1;
+    else res = 0;
     push(res);
 }
 
 void lessEqual() {
     a = pop();
     b = pop();
-    if (b >= a) res= 1;
-    else res= 0;
+    if (b >= a) res = 1;
+    else res = 0;
     push(res);
 }
 
 void greaterThan() {
     a = pop();
     b = pop();
-    if (a - b > 0) res= 1;
-    else res= 0;
+    if (a - b > 0) res = 1;
+    else res = 0;
     push(res);
 }
 
 void greaterEqual() {
     a = pop();
     b = pop();
-    if (a - b >= 0) res= 1;
-    else res= 0;
+    if (a - b >= 0) res = 1;
+    else res = 0;
     push(res);
 }
 
@@ -99,24 +101,29 @@ int jump(int label) {
     return label;
 }
 
-void readInt(){
-    int input=0;
-    scanf("%d",&input);
+void readInt() {
+    int input = 0;
+    scanf("%d", &input);
     push(input);
 
 
 }
-void readChar(){
+
+void readChar() {
     char inputC;
-    scanf("%c",&inputC);
+    scanf("%c", &inputC);
     push(inputC);
 }
-int writeInt(){
-    int output=pop();
+
+int writeInt() {
+    int output = pop();
+    printf("%d", output);
     return output;
 }
-char writeChar(){
-    char output=pop();
+
+char writeChar() {
+    char output = (char) pop();
+    printf("%c", output);
     return output;
 }
 
@@ -136,10 +143,14 @@ int branchTrue(int condition, int target) {
 }*/
 
 int call(int immediate, int pc) {
-    int alt_pc = pc;
+    int old_pc = pc;
     pc = immediate;
+    //inemediate werte instruction
+    push(pc);
+    // pc = jump()
+    //  instruction anrufen
     //execute ,....
     // kommst du zuruck
 
-    return alt_pc;
+    return old_pc;
 }
