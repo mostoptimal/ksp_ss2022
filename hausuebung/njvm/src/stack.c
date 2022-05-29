@@ -59,7 +59,7 @@ void popl(int immediate) {
     stack[frptr + immediate] = pop();
 }
 
-void print_stack(void) {
+/*void print_stack(void) {
     printf("\n   Stack\n");
     printf(".-------+--------.\n");
     for (int i = sp; i >= 0; i--) {
@@ -69,5 +69,5 @@ void print_stack(void) {
             printf("|%7d| %5d |\n", i, stack[i]);
     }
     printf("'-------+--------'\n\n");
-}
+}*/
 //Stack End-----------------------------------------------------------------------

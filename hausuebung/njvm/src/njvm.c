@@ -24,6 +24,7 @@ unsigned int *allVariable;
 int rv = 0;
 int immediate = 0;
 int *progMemory;
+int res;
 /** todo list
  * 1)  run instruction testen
  * 2) execute testen
@@ -55,7 +56,7 @@ void execute(unsigned int instruct) {
             break;
         case PUSHC://PUSHC
             push(immediate);
-            printf("pushc %d\n", immediate);
+            printf("pushc\t%d\n", immediate);
             break;
         case ADD://ADD
             add();
@@ -80,7 +81,7 @@ void execute(unsigned int instruct) {
         case PUSHG: //PUSHG
             // push n element from static data area to Stack
             push(sda[immediate]);
-            printf("pushg %d\n", immediate);
+            printf("pushg\t%d\n", immediate);
             break;
         case POPG:
             //popg <n> → ... value -> ... - Der Wert value wird in der SDA als n-tes Element
@@ -89,12 +90,12 @@ void execute(unsigned int instruct) {
             // push a element in position n in SDA
             a = pop();
             sda[immediate] = a;
-            printf("popg %d\n", immediate);
+            printf("popg\t%d\n", immediate);
             break;
         case ASF://ASF 13
             //asf <n> Allocate Stack Frame — n gibt die Anzahl der zu reservierenden lokalen Variablen an
             asf(immediate);
-            printf("asf %d\n", immediate);
+            printf("asf\t%d\n", immediate);
             break;
         case RSF:
             rsf();
@@ -102,11 +103,11 @@ void execute(unsigned int instruct) {
             break;
         case PUSHL:
             pushl(immediate);
-            printf("puschl %d\n", immediate);
+            printf("puschl\t%d\n", immediate);
             break;
         case POPL:
             popl(immediate);
-            printf("puschl %d\n", immediate);
+            printf("puschl\t%d\n", immediate);
             break;
         case EQ://eq
             equal();
@@ -134,24 +135,24 @@ void execute(unsigned int instruct) {
             break;
         case JMP://jmp <target>
             pc = jump(immediate);
-            printf("jmp %d\n", immediate);
+            printf("jmp\t%d\n", immediate);
             break;
         case BRF://brf <target>
             b = pop();
             if (b == 0) pc = immediate;
-            printf("brf %d\n", immediate);
+            printf("brf\t%d\n", immediate);
             break;
         case BRT://brt <target>
             b = pop();
             if (b == 1) pc = immediate;
-            printf("brt %d\n", immediate);
+            printf("brt\t%d\n", immediate);
             break;
         case RDINT:
             readInt();
             printf("rdint\n");
             break;
         case WRINT:
-            writeInt();
+            res = writeInt();
             printf("wrint\n");
             break;
         case RDCHR:
@@ -160,15 +161,15 @@ void execute(unsigned int instruct) {
             break;
         case WRCHR:
             writeChar();
-            printf("wrchr\n");
+            printf("wrchr\t%c\n", writeChar());
             break;
         case CALL:
             call(immediate, pc);
-            printf("call %d\n", immediate);
+            printf("call\t%d\n", immediate);
             break;
         case RET:
             pc = pop();
-            printf("ret %d\n", pc);
+            printf("ret\t%d\n", pc);
             break;
         case DROP: {
             int k = 0;
@@ -177,15 +178,15 @@ void execute(unsigned int instruct) {
                 ++k;
             }
         }
-            printf("drop %d\n", immediate);
+            printf("drop\t%d\n", immediate);
             break;
         case PUSHR:
             push(rv);
-            printf("pushr %d\n", rv);
+            printf("pushr\t%d\n", rv);
             break;
         case POPR:
             rv = pop();
-            printf("popr %d\n", rv);
+            printf("popr\t%d\n", rv);
             break;
         case DUP:
             // sp +1
@@ -225,12 +226,13 @@ void execute(unsigned int instruct) {
 void RunInstructionToAssemble(unsigned int programMemory[]) {
 
     while (programMemory[pc] != 0) {// HALT
-        printf("%03d\t: ", pc);
+        printf("%03d:\t", pc);
         execute(programMemory[pc]);
         pc++;
     }
-    printf("halt\n");
-    print_stack();
+    printf("%03d\t:halt\t\n", pc);
+    printf("Result: %d\n", res);
+    //print_stack();
 }
 
 void readInputInTerminal(int argc, char *argv[]) {
@@ -305,7 +307,8 @@ int main(int argc, char *argv[]) {
     /** 2nd Step: Read the version number. **********/
     //2) Read the version number.
     fread(&version, sizeof(int), 1, filePointer);
-    if (version != 2) {
+    //TODO: Version always under Observation
+    if (version < 2) {
         printf("Error: file %s has wrong version number %d\n", fileName, version);
         exit(1);
     }
