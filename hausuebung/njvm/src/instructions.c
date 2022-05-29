@@ -7,47 +7,42 @@
 
 int a, b, res;
 
-void add() {
+void add(void) {
     a = pop();
     b = pop();
     res = a + b;
     push(res);
-    printf("ADD %d + %d\n", a, b);
 }
 
-void sub() {
+void sub(void) {
     a = pop();
     b = pop();
     res = a - b;
-    printf("SUB %d - %d\n", a, b);
     push(res);
 }
 
-void mul() {
+void mul(void) {
     a = pop();
     b = pop();
     res = a * b;
-    printf("MUL %d * %d\n", a, b);
     push(res);
 }
 
-void divid() {
+void divid(void) {
     a = pop();
     b = pop();
     res = a / b;
-    printf("DIV %d / %d\n", a, b);
     push(res);
 }
 
-void mod() {
+void mod(void) {
     a = pop();
     b = pop();
     res = a % b;
-    printf("MOD %d %d\n", a, b);
     push(res);
 }
 
-void equal() {
+void equal(void) {
     a = pop();
     b = pop();
     if (a == b) {//or v1-v2==0
@@ -56,7 +51,7 @@ void equal() {
     push(res);
 }
 
-void nequal() {
+void nequal(void) {
     a = pop();
     b = pop();
     if (a != b) res = 1;
@@ -64,7 +59,7 @@ void nequal() {
     push(res);
 }
 
-void lessThan() {
+void lessThan(void) {
     a = pop();
     b = pop();
     if (a < b) res = 1;
@@ -72,7 +67,7 @@ void lessThan() {
     push(res);
 }
 
-void lessEqual() {
+void lessEqual(void) {
     a = pop();
     b = pop();
     if (b >= a) res = 1;
@@ -80,7 +75,7 @@ void lessEqual() {
     push(res);
 }
 
-void greaterThan() {
+void greaterThan(void) {
     a = pop();
     b = pop();
     if (a - b > 0) res = 1;
@@ -88,7 +83,7 @@ void greaterThan() {
     push(res);
 }
 
-void greaterEqual() {
+void greaterEqual(void) {
     a = pop();
     b = pop();
     if (a - b >= 0) res = 1;
@@ -101,7 +96,7 @@ int jump(int label) {
     return label;
 }
 
-void readInt() {
+void readInt(void) {
     int input = 0;
     scanf("%d", &input);
     push(input);
@@ -109,21 +104,19 @@ void readInt() {
 
 }
 
-void readChar() {
+void readChar(void) {
     char inputC;
     scanf("%c", &inputC);
     push(inputC);
 }
 
-int writeInt() {
+int writeInt(void) {
     int output = pop();
-    printf("%d", output);
     return output;
 }
 
-char writeChar() {
+char writeChar(void) {
     char output = (char) pop();
-    printf("%c", output);
     return output;
 }
 

@@ -12,7 +12,6 @@
 
 char *runOption;
 FILE *filePointer;
-unsigned int instruction;
 int *sda; //static Data Area
 int version;
 unsigned int IR = 0;
@@ -22,8 +21,9 @@ int sdaIndex = 0;
 int pc = 0;
 unsigned int *allInstruct;
 unsigned int *allVariable;
-int rv=0;
-int immediate=0;
+int rv = 0;
+int immediate = 0;
+int *progMemory;
 /** todo list
  * 1)  run instruction testen
  * 2) execute testen
@@ -45,32 +45,36 @@ void popg(int index) {
     sda[index] = value;
 }
 
-/**
- * */
-void execute(int instruct) {
+void execute(unsigned int instruct) {
     int a, b;
-    immediate= SIGN_EXTEND(instruct);
-    IR = (instruct >> 24); /* 1. musn't shift*/
-
+    immediate = SIGN_EXTEND(IMMEDIATE(instruct));
+    IR = (instruct >> 24);
     switch (IR) {
         case HALT://HALT
+            printf("halt\n");
             break;
         case PUSHC://PUSHC
             push(immediate);
+            printf("pushc %d\n", immediate);
         case ADD://ADD
             add();
+            printf("add\n");
         case SUB://SUB
             sub();
+            printf("sub\n");
         case MUL://MUL
             mul();
+            printf("mul\n");
         case DIV://DIV
             divid();
+            printf("div\n");
         case MOD://MOD
             mod();
+            printf("mod\n");
         case PUSHG: //PUSHG
             // push n element from static data area to Stack
             push(sda[immediate]);
-
+            printf("pushg %d\n", immediate);
         case POPG:
             //popg <n> → ... value -> ... - Der Wert value wird in der SDA als n-tes Element
             //gespeichert
@@ -78,48 +82,67 @@ void execute(int instruct) {
             // push a element in position n in SDA
             a = pop();
             sda[immediate] = a;
-
+            printf("popg %d\n", immediate);
         case ASF://ASF 13
             //asf <n> Allocate Stack Frame — n gibt die Anzahl der zu reservierenden lokalen Variablen an
             asf(immediate);
+            printf("asf %d\n", immediate);
         case RSF:
             rsf();
+            printf("rsf\n");
         case PUSHL:
             pushl(immediate);
+            printf("puschl %d\n", immediate);
         case POPL:
             popl(immediate);
+            printf("puschl %d\n", immediate);
         case EQ://eq
             equal();
+            printf("eq\n");
         case NE://ne
             nequal();
+            printf("neq\n");
         case LT://lt
             lessThan();
+            printf("lt\n");
         case LE://le
             lessEqual();
+            printf("le\n");
         case GT://gt
             greaterThan();
+            printf("qt\n");
         case GE://ge
             greaterEqual();
+            printf("qe\n");
         case JMP://jmp <target>
             pc = jump(immediate);
+            printf("jmp %d\n", immediate);
         case BRF://brf <target>
             b = pop();
             if (b == 0) pc = immediate;
+            printf("brf %d\n", immediate);
         case BRT://brt <target>
             b = pop();
             if (b == 1) pc = immediate;
+            printf("brt %d\n", immediate);
         case RDINT:
             readInt();
+            printf("rdint\n");
         case WRINT:
             writeInt();
+            printf("wrint\n");
         case RDCHR:
             readChar();
+            printf("rdint\n");
         case WRCHR:
             writeChar();
+            printf("wrchr\n");
         case CALL:
             call(immediate, pc);
+            printf("call %d\n", immediate);
         case RET:
             pc = pop();
+            printf("ret %d\n", pc);
         case DROP: {
             int k = 0;
             while (k < immediate) {
@@ -127,16 +150,20 @@ void execute(int instruct) {
                 ++k;
             }
         }
+            printf("drop %d\n", immediate);
         case PUSHR:
             push(rv);
+            printf("pushr %d\n", rv);
         case POPR:
-            rv=pop();
+            rv = pop();
+            printf("popr %d\n", rv);
         case DUP:
             // sp +1
             // lege ich da die gleiche variable
             a = pop();
             push(a);
             push(a);
+            printf("dup\n");
         case NEW:
         case GETF:
         case PUTF:
@@ -154,14 +181,14 @@ void execute(int instruct) {
 
 
 void RunInstructionToAssemble(unsigned int programMemory[]) {
-    int i = 0;
 
-    while (programMemory[i] != 0) {// HALT
-
-        execute(programMemory[i]); //TODO 2nd Parameter
-        i++;
+    while (programMemory[pc] != 0) {// HALT
+        printf("%03d\t: ", pc);
+        execute(programMemory[pc]);
+        printf("\n");
         pc++;
     }
+    printf("halt\n");
     print_stack();
 }
 
@@ -215,11 +242,8 @@ void readInputInTerminal(int argc, char *argv[]) {
 
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
-    printf("Virtual Machine started\n");
-
     char *fileName;
     fileName = argv[1];
-
     filePointer = fopen(fileName, "r");
 
     //printf("after fopen() before if NULL \n");
@@ -227,7 +251,7 @@ int main(int argc, char *argv[]) {
         printf("Error: cannot open code file '%s'\n", fileName);
         exit(1);
     }
-
+    printf("Virtual Machine started\n");
     /** 1st Step: read the format of Binary File "NJBF" */
     //1) Read the first 4 bytes of the file.
     char *njbf = (char *) malloc(sizeof(char) * 4);

@@ -13,26 +13,14 @@ unsigned int stack[MAX_ITEMS];
 int frptr = 0;
 
 void push(int x) {
-    if (sp > MAX_ITEMS) {
-        printf("Error Stack Overflow :( \n");
-    } else {
-        stack[sp] = x;
-        printf("PUSH %d\n", x);
-        sp++;
-    }
+    stack[sp] = x;
+    sp++;
 }
 
 int pop(void) {
-    unsigned int tmp;
-    if (sp < 0) {
-        printf("Error Stack underFlow :( !!\n");
-        exit(1);
-    } else {
-        sp--;
-        tmp = stack[sp];
-        printf("POP %d\n", tmp);
-        return tmp;
-    }
+    sp--;
+    int tmp = (int) stack[sp];
+    return tmp;
 }
 
 void asf(int n) {
