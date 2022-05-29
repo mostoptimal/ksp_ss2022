@@ -12,15 +12,32 @@ int sp = 0;
 unsigned int stack[MAX_ITEMS];
 int frptr = 0;
 
+void isEmpty(){
+if(sp<0){
+
+}
+}
+
+
 void push(int x) {
-    stack[sp] = x;
-    sp++;
+    if(!(sp>MAX_ITEMS)) {
+        stack[sp] = x;
+        sp++;
+    }else {
+        fprintf(stderr, "Error: StackOverflow\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 int pop(void) {
-    sp--;
-    int tmp = (int) stack[sp];
-    return tmp;
+    if(!(sp<0)) {
+        sp--;
+        int tmp = (int) stack[sp];
+        return tmp;
+    }else{
+        fprintf(stderr,"Error: stackUnderFlow\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void asf(int n) {
