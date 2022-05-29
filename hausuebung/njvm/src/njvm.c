@@ -88,8 +88,10 @@ void execute(unsigned int instruct, int immediate) {
             rsf();
         case PUSHL:
             push(fp + immediate);
-        case POPL:
 
+            pushl(immediate);
+        case POPL:
+          popl(immediate);
         case EQ://eq
             equal();
         case NE://ne

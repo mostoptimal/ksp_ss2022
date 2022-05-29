@@ -104,6 +104,7 @@ void readInt(){
     scanf("%d",&input);
     push(input);
 
+
 }
 void readChar(){
     char inputC;
