@@ -47,8 +47,12 @@ void asf(int n) {
 }
 
 void rsf() {
+    //Rücksprung zu main:
+   // SP := FP ;
+   // FP := FP-alt ;
     sp = frptr;
     frptr = pop();
+
 }
 
 void pushl(int immediate) {

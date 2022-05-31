@@ -4,6 +4,8 @@
 
 #ifndef HAUSUEBUNG_STACK_H
 #define HAUSUEBUNG_STACK_H
+extern int frptr;
+extern int sp;
 void push(int x);
 int pop(void);
 void print_stack(void);

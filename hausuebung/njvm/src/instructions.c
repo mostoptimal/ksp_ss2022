@@ -15,8 +15,8 @@ void add(void) {
 }
 
 void sub(void) {
-    a = pop();
     b = pop();
+    a = pop();
     res = a - b;
     push(res);
 }
@@ -92,7 +92,7 @@ void greaterEqual(void) {
 }
 
 int jump(int label) {
-// zu implementieren
+    // zu implementieren
     return label;
 }
 
@@ -100,8 +100,6 @@ void readInt(void) {
     int input = 0;
     scanf("%d", &input);
     push(input);
-
-
 }
 
 void readChar(void) {
@@ -135,15 +133,26 @@ int branchTrue(int condition, int target) {
         return ziel;
 }*/
 
-int call(int immediate, int pc) {
-    int old_pc = pc;
+int callInstruction(int immediate, int pc) {
+    int old_pc = pc + 1; //frptr
+    push(pc);
     pc = immediate;
     //inemediate werte instruction
-    push(pc);
+
     // pc = jump()
     //  instruction anrufen
     //execute ,....
     // kommst du zuruck
-
     return old_pc;
 }
+
+/*
+char intToChar(int v) {
+    char result = v + '0';
+    return result;
+}
+
+int charToInt(char v) {
+    int result = (int) v;
+    return result;
+}*/

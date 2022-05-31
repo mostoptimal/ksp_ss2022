@@ -44,6 +44,7 @@ int jump(int label);
 
 //int branchTrue(int condition, int target);
 
-int call(int immediate, int pc);
-
+int callInstruction(int immediate, int pc);
+//char intToChar(int v);
+//int charToInt(char v);
 #endif //HAUSUEBUNG_INSTRUCTIONS_H
