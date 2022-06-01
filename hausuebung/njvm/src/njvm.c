@@ -3,10 +3,6 @@
 #include <string.h>
 #include "stack.h"
 
-#define FORMAT "NJBF"
-#define VERSION 4
-
-
 #define HALT 0
 #define PUSHC 1
 #define ADD 2
@@ -42,79 +38,67 @@
 #define SIGN_EXTEND(i) ((i)&0x00800000 ? (i) | 0xFF000000 : (i))
 #define IMMEDIATE(x) ((x)&0x00FFFFFF)
 
-
 FILE *file;
-char *filename;
-char c;
-int format[4];
-char streamsFile[4];   //4 bytes -->NJBF
-unsigned int version[3]; //version,instruction et var statik
-
-int *progSpeicher;   // je speichern les instruction que jaurais lu
-int *sda; // ici j alloquieren la place pr le anzahl d instruction qui yaura zb 13 dans le prog01.bin
+char *fileName;
+int version;
+int *programMemory;
+int *sda;
 int pc = 0;
-unsigned int nummer = 0;
+unsigned int counter = 0;
 int fp = 0;
-char *start = "Ninja Virtual Machine started";
-char *end = "Ninja Virtual Machine stopped";
+int numberOfInstructions;
+int numberOfVariables;
 int returnValue;
 
-int a ,b;
+int a, b, c;
 
 void halt() {
     exit(0);
 }
 
 void add() {
-    int a = pop();
-    int b = pop();
-    int c = a + b;
-
+    a = pop();
+    b = pop();
+    c = a + b;
     push(c);
 }
 
 void sub() {
-    int a = pop();
-    int b = pop();
-    int c = b - a;
-
+    a = pop();
+    b = pop();
+    c = b - a;
     push(c);
 }
 
 void mul() {
-    int a = pop();
-    int b = pop();
-    int c = a * b;
-
+    a = pop();
+    b = pop();
+    c = a * b;
     push(c);
 }
 
-void division() {
-    int a = pop();
-    int b = pop();
-    int c = b / a;
-
+void divid() {
+    a = pop();
+    b = pop();
+    c = b / a;
     push(c);
 }
 
 void mod() {
-
-    int a = pop();
-    int b = pop();
-    int c = b % a;
-
+    a = pop();
+    b = pop();
+    c = b % a;
     push(c);
 }
 
-void rdint() {
-
+void readInt() {
     int eingabe;
     scanf("%d", &eingabe);
     push(eingabe);
 }
 
 void wrint() {
-    int a = pop();
+    a = pop();
     printf("%d", a);
 }
 
@@ -125,153 +109,130 @@ void rdchr() {
 }
 
 void wrchr() {
-    char a = pop();
-    printf("%c", a);
+    char output = pop();
+    printf("%c", output);
 }
 
 void pushg(int element) {
 
-    int y = sda[element];
-    printf("pushg %d\n", y);
-    push(y);
+    int val = sda[element];
+    //printf("pushg %d\n", val);
+    push(val);
 }
 
 void popg(int element) {
 
-    int x = pop();
-    printf("popg %d\n", x);
-    sda[element] = x;
+    int val = pop();
+    //printf("popg %d\n", val);
+    sda[element] = val;
 }
-
+//Allocate Release:
 void asf(int n) {
-  int old_fp = fp;
+    int old_fp = fp;
     push(old_fp);
     fp = sp;
     sp = sp + n;
 }
-
 void rsf() {
     sp = fp;
     fp = pop();
 }
-
+//PUSHL POPL
 void pushl(int lokVar) {
     // push to stack local variable
     push(stack[fp + lokVar]);
 }
-
 void popl(int lokVar) {
     stack[fp + lokVar] = pop();
 }
-
-void eq() {
+//Logic
+void equal() {
     a = pop();
-     b = pop();
+    b = pop();
     if (a == b) {
         push(1);
     } else {
         push(0);
     }
 }
-
-void ne() {
-
-    int a = pop();
-    int b = pop();
+void nequal() {
+    a = pop();
+    b = pop();
     if (a != b) {
         push(1);
     } else {
         push(0);
     }
 }
-
-void lt() {
-    int a = pop();
-    int b = pop();
+void lessThan() {
+    a = pop();
+    b = pop();
     if (b > a) {
         push(1);
     } else {
         push(0);
     }
 }
-
-void le() {
-    int a = pop();
-    int b = pop();
+void lessEqual() {
+    a = pop();
+    b = pop();
     if (b <= a) {
         push(1);
     } else {
         push(0);
     }
 }
-
-void gt() {
-    int a = pop();
-    int b = pop();
+void greaterThan() {
+    a = pop();
+    b = pop();
     if (b > a) {
         push(1);
     } else {
         push(0);
     }
 }
-
-void ge() {
-    int a = pop();
-    int b = pop();
+void greatEqual() {
+    a = pop();
+    b = pop();
     if (b >= a) {
         push(1);
     } else {
         push(0);
     }
 }
-
-void brt(int a) {
-    int b = pop();
-
+void branchIfTrue(int a) {
+    b = pop();
     if (b == 1) pc = a;
-
 }
-
-void brf(int a) {
-    int b = pop();
-
-    if (b == 0) pc = a;
-
+void branchIfFalse(int x) {
+    b = pop();
+    if (b == 0) pc = x;
 }
-
-void jmp(int a) {
-    pc = a;
+//jump
+void jmp(int x) {
+    pc = x;
 }
-
+//call & return
 void call(int x) {
-//ZB
     push(pc);
     pc = x;
 }
-
 void ret() {
     pc = pop();
 }
 
 void drop(int n) {
-//loescht alle lokale var die in der methode waren
-    while (n != 0) {
+    int ct;
+    for(ct=0;ct<n;ct++){
         pop();
-        n--;
     }
-
 }
 
 void pushr() {
-    //cette valeur qui etait le resultat d une methode kon avait appeler
     push(returnValue);
-
 }
 
 void popr() {
-
-//pop die oberste value und speichert in returnvalue
-
     returnValue = pop();
 }
 
@@ -284,12 +245,11 @@ void dup() {
 
 void executable(unsigned int IR) {
     unsigned int instruction = IR >> 24;
-
+    int immediate = SIGN_EXTEND(IMMEDIATE(IR));
     switch (instruction) {
         case PUSHC:
-            push(SIGN_EXTEND(IMMEDIATE(IR)));
+            push(immediate);
             break;
-
         case ADD:
             add();
             break;
@@ -299,17 +259,15 @@ void executable(unsigned int IR) {
         case MUL:
             mul();
             break;
-
         case DIV:
-            division();
+            divid();
             break;
         case MOD:
             mod();
             break;
         case RDINT:
-            rdint();
+            readInt();
             break;
-
         case WRINT:
             wrint();
             break;
@@ -320,279 +278,257 @@ void executable(unsigned int IR) {
             wrchr();
             break;
         case PUSHG:
-            pushg(SIGN_EXTEND(IMMEDIATE(IR)));
+            pushg(immediate);
             break;
         case POPG:
-            popg(SIGN_EXTEND(IMMEDIATE(IR)));
+            popg(immediate);
             break;
-
         case ASF:
-            asf(SIGN_EXTEND(IMMEDIATE(IR)));
+            asf(immediate);
             break;
         case RSF:
             rsf();
             break;
-
         case PUSHL:
-            pushl(SIGN_EXTEND(IMMEDIATE(IR)));
+            pushl(immediate);
             break;
         case POPL:
-            popl(SIGN_EXTEND(IMMEDIATE(IR)));
+            popl(immediate);
             break;
-
         case EQ:
-            eq();
+            equal();
             break;
         case NE:
-            ne();
+            nequal();
             break;
         case LT:
-            lt();
+            lessThan();
             break;
         case LE:
-            le();
+            lessEqual();
             break;
         case GT:
-            gt();
+            greaterThan();
             break;
         case GE:
-            ge();
+            greatEqual();
             break;
         case BRF:
-            brf(SIGN_EXTEND(IMMEDIATE(IR)));
+            branchIfFalse(immediate);
             break;
-
         case BRT:
-            brt(SIGN_EXTEND(IMMEDIATE(IR)));
+            branchIfTrue(immediate);
             break;
-
         case JMP:
-            jmp(SIGN_EXTEND(IMMEDIATE(IR)));
+            jmp(immediate);
             break;
         case CALL:
-            call(SIGN_EXTEND(IMMEDIATE(IR)));
+            call(immediate);
             break;
-
         case RET:
             ret();
             break;
-
         case DROP:
-            drop(SIGN_EXTEND(IMMEDIATE(IR)));
+            drop(immediate);
             break;
-
         case PUSHR:
             pushr();
             break;
         case POPR:
-            popr(SIGN_EXTEND(IMMEDIATE(IR)));
+            popr(immediate);
             break;
         case DUP:
             break;
         case HALT:
-            halt();
+
             break;
     }
 }
 
-void listener(unsigned int IR) {
-
+/**
+void printInst(unsigned int IR) {
     unsigned int instruction = IR >> 24;
     switch (instruction) {
 
         case PUSHC:
-            printf(" %03d:\t PUSHC\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t PUSHC\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case ADD:
-            printf(" %03d:\t ADD\n", nummer);
+            printf(" %03d:\t ADD\n", counter);
 
             break;
 
         case SUB:
-            printf(" %03d:\t SUB\n", nummer);
+            printf(" %03d:\t SUB\n", counter);
             break;
 
         case MUL:
-            printf(" %03d:\t MUL\n", nummer);
+            printf(" %03d:\t MUL\n", counter);
             break;
 
         case DIV:
-            printf(" %03d:\t DIV\n", nummer);
+            printf(" %03d:\t DIV\n", counter);
             break;
 
         case MOD:
-            printf(" %03d:\t MOD\n", nummer);
+            printf(" %03d:\t MOD\n", counter);
             break;
 
         case RDINT:
-            printf(" %03d:\t RDINT\n", nummer);
+            printf(" %03d:\t RDINT\n", counter);
             break;
 
         case WRINT:
-            printf(" %03d:\t WRINT\n", nummer);
+            printf(" %03d:\t WRINT\n", counter);
             break;
 
         case RDCHR:
-            printf(" %03d:\t RDCHR\n", nummer);
+            printf(" %03d:\t RDCHR\n", counter);
             break;
 
         case WRCHR:
-            printf(" %03d:\t WRCHR\n", nummer);
+            printf(" %03d:\t WRCHR\n", counter);
             break;
 
         case HALT:
-            printf(" %03d:\t halt\n", nummer);
+            printf(" %03d:\t halt\n", counter);
             break;
 
         case PUSHG:
-            printf(" %03d:\t PUSHG\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t PUSHG\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case POPG:
-            printf(" %03d:\t POPG\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t POPG\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case ASF:
-            printf(" %03d:\t ASF\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t ASF\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case RSF:
-            printf(" %03d:\t RSF\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t RSF\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case PUSHL:
-            printf(" %03d:\t PUSHL\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t PUSHL\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case POPL:
-            printf(" %03d:\t POPL\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t POPL\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case EQ:
-            printf(" %03d:\t EQ\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t EQ\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
-
-
         case NE:
-            printf(" %03d:\t NE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t NE\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case LT:
-            printf(" %03d:\t LT\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t LT\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case LE:
-            printf(" %03d:\t LE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t LE\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case GT:
-            printf(" %03d:\t GT\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t GT\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
         case CALL:
-            printf(" %03d:\t call\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t call\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case RET:
-            printf(" %03d:\t GE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t GE\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
         case DROP:
-            printf(" %03d:\t drop\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t drop\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
         case PUSHR:
-            printf(" %03d:\t pushr ge\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            printf(" %03d:\t pushr greatEqual\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
             break;
 
-        case  POPR:
-        printf(" %03d:\t popr\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-        break;
+        case POPR:
+            printf(" %03d:\t popr\t%d\n", counter, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
         default:
-        printf("not knowed instruction\n");
+            printf("not knowed instruction\n");
     }
 }
-
-void show(char *msg) {
-    printf("%s\n", msg);
-}
+*/
 
 void execute() {
     int IR = 0;
     do {
-        IR = progSpeicher[pc];
+        IR = programMemory[pc];
         pc = pc + 1;
         executable(IR);
     } while (IR >> 24 != HALT);
 
-    printf("%s", end);
 }
+void workWithFile(int argc,char *argv[]){
+    if (argv[1] != NULL) {
+        fileName = argv[1];
+        file = fopen(fileName, "r");
+        //printf("after fopen() before if NULL \n");
+        if (file == NULL) {
+            printf("Error: cannot open code file '%s'\n", fileName);
+            exit(1);
+        }
+        /** 1st Step: read the format of Binary File "NJBF" */
+        //1) Read the first 4 bytes of the file.
+        char *njbf = (char *) malloc(sizeof(char) * 4);
+        fread(njbf, sizeof(char), 4, file);
+        if (strcmp(njbf, "NJBF") != 0) {
+            //printf("Format is NOT Correct :) \n");
+            exit(1);
+        }
 
-int isbin(char *filename) {
-    //
-    char *sub = malloc(sizeof(char) * 5);
-    int len = strlen(filename);
-    int position = len - 4;
+        /** 2nd Step: Read the version number. **********/
+        //2) Read the version number.
+        fread(&version, sizeof(int), 1, file);
+        //TODO: Version always under Observation
+        if (version < 2) {
+            printf("Error: file %s has wrong version number %d\n", fileName, version);
+            exit(1);
+        }
 
-    int c = 0;
-    sub[4] = '\0';
+        /** 3rd Step: Read the Number of Instructions */
+        // 3) Read the number of instructions.
+        fread(&numberOfInstructions, sizeof(int), 1, file);
+        programMemory = malloc(numberOfInstructions * sizeof(unsigned int));
 
-    while (position < len) {
-        sub[c] = filename[position];
-        c++;
-        position++;
-    }
+        /** 4th Step: read the Number of Global-Variables in SDA */
+        //4) Read the number of variables in the static data area.
+        fread(&numberOfVariables, sizeof(int), 1, file);
+        if (numberOfVariables > 0) {
+            //SDA Allocate for Public Variables
+            sda = malloc(numberOfVariables * sizeof(int));
+        }
 
-    if (strcmp(sub, ".bin") == 0) {
-
-        // printf("binary datei%s", sub);
-        return 1;
-    } else {
-        return 0;
+        /**5th Step: reading the rest of File */
+        //5) Read the rest of the file into the memory allocated in step 3).
+        fread(programMemory, sizeof(unsigned int), numberOfInstructions, file);
+        execute();
+        /**6th Step: Closing the File */
+        if (fclose(file) != 0) {
+            perror("ERROR (fclose)");
+        }
     }
 }
 
 int main(int argc, char *argv[]) {
 
-    if (argc > 1) {
-        if (argc > 2) {
-            printf("err >2");
-        } else {
-            filename = argv[1];
 
-            file = fopen(argv[1], "r"); // je lis l argument par ex prog01.bin
-            if (file == NULL) {
-                printf("Error cannot open file %s", argv[1]);
-            } else {
+    printf("Ninja Virtual Machine started\n");
 
-                // printf("hier lesen faengt an");
-                if (isbin(filename) == 1) {
-                    // printf("binary file\n");
+    workWithFile(argc,argv);
 
-                    fread(streamsFile, sizeof(char), 4, file); // streamfile speicher les 4 premiers bytes Format
 
-                    fread(version, sizeof(int), 3, file); //version  hat 3 plaetze version-->instruction-->statik var
-
-                    if (strncmp(streamsFile, FORMAT, 4) == 0 && (int) version[0] == VERSION) {
-                        progSpeicher = malloc(sizeof(int) * (int) version[1]);
-                        if ((int) version[2] != 0) {
-                            sda = malloc(sizeof(int) * (int) version[2]);
-                        }
-                        fread(progSpeicher, sizeof(int), version[1], file);
-
-                        show(start);
-
-                        execute();
-                        printf("%s", end);
-                    } else {
-                    }
-                } else {
-                    printf("Error file %s is not a Ninja binary", argv[1]);
-                }
-            }
-        }
-    } else {
-        printf("error : no code file specified");
-    }
-
+    printf("Ninja Virtual Machine stopped\n");
     return 0;
 }

@@ -55,30 +55,6 @@ build CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o: C_COMPILER__hausuebung_Debug 
   OBJECT_DIR = CMakeFiles/hausuebung.dir
   OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
 
-build CMakeFiles/hausuebung.dir/njvm/src/stack.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/stack.c || cmake_object_order_depends_target_hausuebung
-  DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/stack.c.o.d
-  FLAGS = -g -std=gnu11
-  OBJECT_DIR = CMakeFiles/hausuebung.dir
-  OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
-
-build CMakeFiles/hausuebung.dir/njvm/src/programs.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/programs.c || cmake_object_order_depends_target_hausuebung
-  DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/programs.c.o.d
-  FLAGS = -g -std=gnu11
-  OBJECT_DIR = CMakeFiles/hausuebung.dir
-  OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
-
-build CMakeFiles/hausuebung.dir/njvm/src/instructions.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/instructions.c || cmake_object_order_depends_target_hausuebung
-  DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/instructions.c.o.d
-  FLAGS = -g -std=gnu11
-  OBJECT_DIR = CMakeFiles/hausuebung.dir
-  OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
-
-build CMakeFiles/hausuebung.dir/njvm/src/execute.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/execute.c || cmake_object_order_depends_target_hausuebung
-  DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/execute.c.o.d
-  FLAGS = -g -std=gnu11
-  OBJECT_DIR = CMakeFiles/hausuebung.dir
-  OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target hausuebung
@@ -87,7 +63,7 @@ build CMakeFiles/hausuebung.dir/njvm/src/execute.c.o: C_COMPILER__hausuebung_Deb
 #############################################
 # Link the executable hausuebung
 
-build hausuebung: C_EXECUTABLE_LINKER__hausuebung_Debug CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o CMakeFiles/hausuebung.dir/njvm/src/stack.c.o CMakeFiles/hausuebung.dir/njvm/src/programs.c.o CMakeFiles/hausuebung.dir/njvm/src/instructions.c.o CMakeFiles/hausuebung.dir/njvm/src/execute.c.o
+build hausuebung: C_EXECUTABLE_LINKER__hausuebung_Debug CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/hausuebung.dir
   POST_BUILD = :
