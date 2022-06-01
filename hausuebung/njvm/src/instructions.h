@@ -17,8 +17,6 @@ void mod();
 
 void equal();
 
-int jump(int label);
-
 void nequal();
 
 void lessThan();
@@ -33,18 +31,18 @@ void readInt();
 
 void readChar();
 
-int writeInt();
+void writeInt();
 
-char writeChar();
+void writeChar();
 
-int jump(int label);
+//int jump(int label);
 
 
-//int branchFalse(int condition, int target);
+void branchFalse(int wert);
 
-//int branchTrue(int condition, int target);
+void branchTrue(int wert);
 
-int callInstruction(int immediate, int pc);
+int callInstruction(int immediate);
 //char intToChar(int v);
 //int charToInt(char v);
 #endif //HAUSUEBUNG_INSTRUCTIONS_H

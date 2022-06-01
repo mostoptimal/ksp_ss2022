@@ -31,73 +31,61 @@ void mul(void) {
 void divid(void) {
     a = pop();
     b = pop();
-    res = a / b;
+    res = b / a;
     push(res);
 }
 
 void mod(void) {
     a = pop();
     b = pop();
-    res = a % b;
+    res = b % a;
     push(res);
 }
 
 void equal(void) {
     a = pop();
     b = pop();
-    if (a == b) {//or v1-v2==0
-        res = 1;//1 for True
-    } else res = 0;//0 for False
-    push(res);
+    if (a == b) { push(1); }
+    else { push(0); }
 }
 
 void nequal(void) {
     a = pop();
     b = pop();
-    if (a != b) res = 1;
-    else res = 0;
-    push(res);
+    if (a != b) { push(1); }
+    else { push(0); }
 }
 
 void lessThan(void) {
     a = pop();
     b = pop();
-    if (a < b) res = 1;
-    else res = 0;
-    push(res);
+    if (b < a) { push(1); }
+    else { push(0); }
 }
 
 void lessEqual(void) {
     a = pop();
     b = pop();
-    if (b >= a) res = 1;
-    else res = 0;
-    push(res);
+    if (b <= a) { push(1); }
+    else { push(0); }
 }
 
 void greaterThan(void) {
     a = pop();
     b = pop();
-    if (a - b > 0) res = 1;
-    else res = 0;
-    push(res);
+    if (b > a) { push(1); }
+    else { push(0); }
 }
 
 void greaterEqual(void) {
     a = pop();
     b = pop();
-    if (a - b >= 0) res = 1;
-    else res = 0;
-    push(res);
-}
-
-int jump(int label) {
-    // zu implementieren
-    return label;
+    if (b >= a) { push(1); }
+    else { push(0); }
 }
 
 void readInt(void) {
-    int input = 0;
+    int input;
     scanf("%d", &input);
     push(input);
 }
@@ -108,43 +96,16 @@ void readChar(void) {
     push(inputC);
 }
 
-int writeInt(void) {
+void writeInt(void) {
     int output = pop();
-    return output;
+    printf("%d",output);
 }
 
-char writeChar(void) {
-    char output = (char) pop();
-    return output;
+void writeChar(void) {
+    char output =(char) pop();
+    printf("%c",output);
 }
 
-
-/**
-int branchFalse(int condition, int target) {
-    int ziel=target;
-    if (condition == 0)
-        return ziel;
-
-}
-
-int branchTrue(int condition, int target) {
-    int ziel=target;
-    if (condition == 1)
-        return ziel;
-}*/
-
-int callInstruction(int immediate, int pc) {
-    int old_pc = pc + 1; //frptr
-    push(pc);
-    pc = immediate;
-    //inemediate werte instruction
-
-    // pc = jump()
-    //  instruction anrufen
-    //execute ,....
-    // kommst du zuruck
-    return old_pc;
-}
 
 /*
 char intToChar(int v) {

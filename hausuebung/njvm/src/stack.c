@@ -9,35 +9,30 @@
 
 //Stack Begin---------------------------------------------------------------------
 int sp = 0;
-unsigned int stack[MAX_ITEMS];
+int stack[MAX_ITEMS];
 int frptr = 0;
-
-void isEmpty(){
-if(sp<0){
-
-}
-}
 
 
 void push(int x) {
-    if(!(sp>MAX_ITEMS)) {
+    if (sp < MAX_ITEMS) {
         stack[sp] = x;
         sp++;
-    }else {
+    } else {
         fprintf(stderr, "Error: StackOverflow\n");
         exit(EXIT_FAILURE);
     }
 }
 
 int pop(void) {
-    if(!(sp<0)) {
+    int tmp;
+    if ((sp != 0)) {
+        tmp = stack[sp];
         sp--;
-        int tmp = (int) stack[sp];
-        return tmp;
-    }else{
-        fprintf(stderr,"Error: stackUnderFlow\n");
+    } else {
+        fprintf(stderr, "Error: stackUnderFlow\n");
         exit(EXIT_FAILURE);
     }
+    return tmp;
 }
 
 void asf(int n) {
@@ -48,11 +43,10 @@ void asf(int n) {
 
 void rsf() {
     //Rücksprung zu main:
-   // SP := FP ;
-   // FP := FP-alt ;
+    // SP := FP ;
+    // FP := FP-alt ;
     sp = frptr;
     frptr = pop();
-
 }
 
 void pushl(int immediate) {
@@ -63,15 +57,4 @@ void popl(int immediate) {
     stack[frptr + immediate] = pop();
 }
 
-/*void print_stack(void) {
-    printf("\n   Stack\n");
-    printf(".-------+--------.\n");
-    for (int i = sp; i >= 0; i--) {
-        if (i == sp)
-            printf("|sp %3d| <empty>|\n", i);
-        else
-            printf("|%7d| %5d |\n", i, stack[i]);
-    }
-    printf("'-------+--------'\n\n");
-}*/
 //Stack End-----------------------------------------------------------------------
