@@ -397,62 +397,118 @@ void executable(unsigned int IR) {
 
 void listener(unsigned int IR) {
 
-    if (IR >> 24 == PUSHC) {
-        printf(" %03d:\t PUSHC\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == ADD) {
-        printf(" %03d:\t ADD\n", nummer);
-    } else if (IR >> 24 == SUB) {
-        printf(" %03d:\t SUB\n", nummer);
-    } else if (IR >> 24 == MUL) {
-        printf(" %03d:\t MUL\n", nummer);
-    } else if (IR >> 24 == DIV) {
-        printf(" %03d:\t DIV\n", nummer);
-    } else if (IR >> 24 == MOD) {
-        printf(" %03d:\t MOD\n", nummer);
-    } else if (IR >> 24 == RDINT) {
-        printf(" %03d:\t RDINT\n", nummer);
-    } else if (IR >> 24 == WRINT) {
-        printf(" %03d:\t WRINT\n", nummer);
-    } else if (IR >> 24 == RDCHR) {
-        printf(" %03d:\t RDCHR\n", nummer);
-    } else if (IR >> 24 == WRCHR) {
-        printf(" %03d:\t WRCHR\n", nummer);
-    } else if (IR >> 24 == HALT) {
-        printf(" %03d:\t halt\n", nummer);
-    } else if (IR >> 24 == PUSHG) {
-        printf(" %03d:\t PUSHG\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == POPG) {
-        printf(" %03d:\t POPG\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == ASF) {
-        printf(" %03d:\t ASF\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == RSF) {
-        printf(" %03d:\t RSF\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == PUSHL) {
-        printf(" %03d:\t PUSHL\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == POPL) {
-        printf(" %03d:\t POPL\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == EQ) {
-        printf(" %03d:\t EQ\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == NE) {
-        printf(" %03d:\t NE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == LT) {
-        printf(" %03d:\t LT\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == LE) {
-        printf(" %03d:\t LE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == GT) {
-        printf(" %03d:\t GT\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == CALL) {
-        printf(" %03d:\t call\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == RET) {
-        printf(" %03d:\t GE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == DROP) {
-        printf(" %03d:\t drop\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == PUSHR) {
-        printf(" %03d:\t pushr ge\t%d\n", nummer,SIGN_EXTEND(IMMEDIATE(IR)));
-    } else if (IR >> 24 == POPR) {
+    unsigned int instruction = IR >> 24;
+    switch (instruction) {
+
+        case PUSHC:
+            printf(" %03d:\t PUSHC\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case ADD:
+            printf(" %03d:\t ADD\n", nummer);
+
+            break;
+
+        case SUB:
+            printf(" %03d:\t SUB\n", nummer);
+            break;
+
+        case MUL:
+            printf(" %03d:\t MUL\n", nummer);
+            break;
+
+        case DIV:
+            printf(" %03d:\t DIV\n", nummer);
+            break;
+
+        case MOD:
+            printf(" %03d:\t MOD\n", nummer);
+            break;
+
+        case RDINT:
+            printf(" %03d:\t RDINT\n", nummer);
+            break;
+
+        case WRINT:
+            printf(" %03d:\t WRINT\n", nummer);
+            break;
+
+        case RDCHR:
+            printf(" %03d:\t RDCHR\n", nummer);
+            break;
+
+        case WRCHR:
+            printf(" %03d:\t WRCHR\n", nummer);
+            break;
+
+        case HALT:
+            printf(" %03d:\t halt\n", nummer);
+            break;
+
+        case PUSHG:
+            printf(" %03d:\t PUSHG\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case POPG:
+            printf(" %03d:\t POPG\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case ASF:
+            printf(" %03d:\t ASF\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case RSF:
+            printf(" %03d:\t RSF\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case PUSHL:
+            printf(" %03d:\t PUSHL\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case POPL:
+            printf(" %03d:\t POPL\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case EQ:
+            printf(" %03d:\t EQ\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+
+        case NE:
+            printf(" %03d:\t NE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case LT:
+            printf(" %03d:\t LT\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case LE:
+            printf(" %03d:\t LE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case GT:
+            printf(" %03d:\t GT\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+        case CALL:
+            printf(" %03d:\t call\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case RET:
+            printf(" %03d:\t GE\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case DROP:
+            printf(" %03d:\t drop\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+        case PUSHR:
+            printf(" %03d:\t pushr ge\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
+            break;
+
+        case  POPR:
         printf(" %03d:\t popr\t%d\n", nummer, SIGN_EXTEND(IMMEDIATE(IR)));
-    } else {
-        printf("i dont know\n");
+        break;
+        default:
+        printf("not knowed instruction\n");
     }
 }
 
@@ -462,10 +518,7 @@ void show(char *msg) {
 
 void execute() {
     int IR = 0;
-
-
     do {
-
         IR = progSpeicher[pc];
         pc = pc + 1;
         executable(IR);
