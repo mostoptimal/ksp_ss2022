@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <getopt.h>
-#include "stack.h"
-#include "execute.h"
-#include "programs.h"
-#include "opCodes.h"
-#include "instructions.h" //Contains VM Instructions
 
+
+#include "opCodes.h"
+
+#define MAX_ITEMS 100
 #define DEBUG
 
 char *runOption;
@@ -29,8 +27,162 @@ int res;
 
    */
 
+
+//Stack Begin---------------------------------------------------------------------
+int sp = 0;
+int stack[MAX_ITEMS];
+int frptr = 0;
+
+
+void push(int x) {
+    if (sp < MAX_ITEMS) {
+        stack[sp] = x;
+        sp++;
+    } else {
+        fprintf(stderr, "Error: StackOverflow\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+int pop(void) {
+    int tmp;
+    if ((sp != 0)) {
+        tmp = stack[sp];
+        sp--;
+    } else {
+        fprintf(stderr, "Error: stackUnderFlow\n");
+        exit(EXIT_FAILURE);
+    }
+    return tmp;
+}
+
+void asf(int n) {
+    push(frptr);
+    frptr = sp;
+    sp = sp + n;
+}
+
+void rsf() {
+    //Rücksprung zu main:
+    // SP := FP ;
+    // FP := FP-alt ;
+    sp = frptr;
+    frptr = pop();
+}
+
+void pushl(int immediate) {
+    push(stack[frptr + immediate]);
+}
+
+void popl(int immediate) {
+    stack[frptr + immediate] = pop();
+}
+
+//Stack End-----------------------------------------------------------------------
 /*
- * */
+ * Instructions*/
+
+int a, b, res;
+
+void add(void) {
+    a = pop();
+    b = pop();
+    res = a + b;
+    push(res);
+}
+
+void sub(void) {
+    b = pop();
+    a = pop();
+    res = a - b;
+    push(res);
+}
+
+void mul(void) {
+    a = pop();
+    b = pop();
+    res = a * b;
+    push(res);
+}
+
+void divid(void) {
+    a = pop();
+    b = pop();
+    res = b / a;
+    push(res);
+}
+
+void mod(void) {
+    a = pop();
+    b = pop();
+    res = b % a;
+    push(res);
+}
+
+void equal(void) {
+    a = pop();
+    b = pop();
+    if (a == b) { push(1); }
+    else { push(0); }
+}
+
+void nequal(void) {
+    a = pop();
+    b = pop();
+    if (a != b) { push(1); }
+    else { push(0); }
+}
+
+void lessThan(void) {
+    a = pop();
+    b = pop();
+    if (b < a) { push(1); }
+    else { push(0); }
+}
+
+void lessEqual(void) {
+    a = pop();
+    b = pop();
+    if (b <= a) { push(1); }
+    else { push(0); }
+}
+
+void greaterThan(void) {
+    a = pop();
+    b = pop();
+    if (b > a) { push(1); }
+    else { push(0); }
+}
+
+void greaterEqual(void) {
+    a = pop();
+    b = pop();
+    if (b >= a) { push(1); }
+    else { push(0); }
+}
+
+void readInt(void) {
+    int input;
+    scanf("%d", &input);
+    push(input);
+}
+
+void readChar(void) {
+    char inputC;
+    scanf("%c", &inputC);
+    push(inputC);
+}
+
+void writeInt(void) {
+    int output = pop();
+    printf("%d",output);
+}
+
+void writeChar(void) {
+    char output =(char) pop();
+    printf("%c",output);
+}
+
 void pushg(int index) {
     int value = sda[index];
     push(value);
@@ -55,6 +207,7 @@ void branchTrue(int wert) {
 
 void ret() {
     pc = pop();
+    //printf("\nret PC: %d ret sp: %d\n",pc,sp);
 }
 
 void drop(int x) {
@@ -69,8 +222,11 @@ void jump(int label) {
 }
 
 void call(int x) {
-    push(pc);
+    //printf("\ncall PC: %d ret sp: %d\n",pc,sp);
+    int pcValue=pc;
+    push(pcValue);
     pc = x;
+
 }
 
 void dup() {
@@ -202,7 +358,7 @@ void execute(unsigned int inst, int imm) {
             push(a);
             push(a);
             break;
-/*        case NEW:
+       case NEW:
             break;
         case GETF:
             break;
@@ -438,7 +594,7 @@ void executeProb(unsigned int instU) {
         exit(0);
     } else if (opCcode == DUP) {
         dup();
-    } else;
+    }
 }
 
 void printInst(int instruct) {
@@ -517,7 +673,7 @@ void RunInstructionToAssemble(unsigned int programMemory[]) {
     do {
         IR = programMemory[pc];
         pc++;
-        printInst(IR);
+        //printInst(IR);
         executeProb(IR);
 
     } while (IR != HALT);

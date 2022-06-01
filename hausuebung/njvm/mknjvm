@@ -12,4 +12,4 @@
 # The following line is an example for 
 
 echo gcc -g -Wall -std=c99 -pedantic -o njvm src/njvm.c
-gcc -g -Wall -std=c99 -pedantic -o njvm src/njvm.c src/programs.c src/stack.c src/instructions.c
+gcc -g -Wall -std=c99 -pedantic -o njvm src/njvm.c
