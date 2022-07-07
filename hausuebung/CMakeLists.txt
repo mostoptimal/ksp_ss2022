@@ -4,4 +4,4 @@ project(hausuebung C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(hausuebung
-        njvm/src/njvm.c njvm/src/opCodes.h)
+        njvm/src/njvm.c njvm/src/opCodes.h njvm/src/bigint/include/support.h njvm/src/bigint/include/bigint.h njvm/src/bigint/lib/libbigint.h njvm/src/instructs.c njvm/src/instructs.h)

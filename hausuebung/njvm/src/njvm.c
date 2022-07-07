@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "stack.h"
+#include "bigint/include/support.h"
+#include <stdbool.h>
+#include "bigint/include/bigint.h"
+#include "instructs.h"
 
 #define HALT 0
 #define PUSHC 1
@@ -35,212 +39,701 @@
 #define PUSHR 29
 #define POPR 30
 #define DUP 31
+#define NEW 32
+#define GETF 33
+#define PUTF 34
+#define NEWA 35
+#define GETFA 36
+#define PUTFA 37
+#define GETSZ 38
+#define PUSHN 39
+#define REFEQ 40
+#define REFNE 41
 #define SIGN_EXTEND(i) ((i)&0x00800000 ? (i) | 0xFF000000 : (i))
 #define IMMEDIATE(x) ((x)&0x00FFFFFF)
+
+
+
+//#define STACK_SIZE 100;
 
 FILE *file;
 char *fileName;
 int version;
 int *programMemory;
-int *sda;
+//int *sda;
 int pc = 0;
 unsigned int counter = 0;
 int fp = 0;
 int numberOfInstructions;
 int numberOfVariables;
-int returnValue;
+//int returnValue;
 
-int a, b, c;
 
-void halt() {
+
+StackSlot stack[stackSize]; // ehemals int stack[STACK_SIZE]
+
+// SDA
+size_t sda_size = numberOfVariables * sizeof(ObjRef); // 8 Byte
+ObjRef *sda = malloc(sda_size); // array - sda_size is known!
+// RVR
+ObjRef rvr; // single object
+
+
+StackSlot op1, op2, result, object, value;
+
+void halt(void) {
     exit(0);
 }
 
-void add() {
-    a = pop();
-    b = pop();
-    c = a + b;
-    push(c);
+void add(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic operation\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    bigAdd();
+    pushObj(bip.res);
 }
 
-void sub() {
-    a = pop();
-    b = pop();
-    c = b - a;
-    push(c);
+void sub(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic operation\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    bigSub();
+    pushObj(bip.res);
 }
 
-void mul() {
-    a = pop();
-    b = pop();
-    c = a * b;
-    push(c);
+void mul(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic operation\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    bigMul();
+    pushObj(bip.res);
 }
 
-void divid() {
-    a = pop();
-    b = pop();
-    c = b / a;
-    push(c);
+void divid(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic operation\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    bigDiv();
+    pushObj(bip.res);
 }
 
-void mod() {
-    a = pop();
-    b = pop();
-    c = b % a;
-    push(c);
+void mod(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic operation\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    bigDiv();
+    pushObj(bip.rem);
 }
 
-void readInt() {
-    int eingabe;
-    scanf("%d", &eingabe);
-    push(eingabe);
+void readInt(void) {
+    bigRead(stdin);
+    pushObj(bip.res);
 }
 
-void wrint() {
-    a = pop();
-    printf("%d", a);
+void wrint(void) {
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "ERROR: result is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (result.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!IS_PRIMITIVE(result.u.objRef)) {
+        fprintf(stderr, "Error: Object is not a primitive object\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = result.u.objRef;
+    //printf("writing: %d\result", bigToInt());
+    bigPrint(stdout);
 }
 
-void rdchr() {
+void rdchr(void) {
     char eingabe;
-    scanf("%c", &eingabe);
-    push(eingabe);
+    scanf(" %c", &eingabe);
+    //char inputBuffer[15];
+    //fgets(inputBuffer, sizeof(inputBuffer), stdin);
+    //sscanf(inputBuffer, "%c", &input);
+    bigFromInt((int) eingabe);
+    pushObj(bip.res);
 }
 
-void wrchr() {
-    char output = pop();
-    printf("%c", output);
+void wrchr(void) {
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "ERROR: result is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (result.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!IS_PRIMITIVE(result.u.objRef)) {
+        fprintf(stderr, "Error: Object is not a primitive object\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = result.u.objRef;
+    printf("%c", bigToInt());
+}
+
+void pushc(int element){
+    bigFromInt(element);
+    pushObj(bip.res);
 }
 
 void pushg(int element) {
-
-    int val = sda[element];
-    //printf("pushg %d\n", val);
-    push(val);
+    if (element >= sda_size || element < 0) {
+        fprintf(stderr, "Invalid position %d in static data area", element);
+        exit(EXIT_FAILURE);
+    }
+    pushObj(*(sdaPtr + element));
 }
 
 void popg(int element) {
 
-    int val = pop();
-    //printf("popg %d\n", val);
-    sda[element] = val;
+    if (element >= sda_size || element < 0) {
+        fprintf(stderr, "Invalid position %d in static data area", element);
+        exit(EXIT_FAILURE);
+    }
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "Stackslot doesnt hold ObjRef");
+        exit(EXIT_FAILURE);
+    }
+    *(sdaPtr + element) = result.u.objRef;
 }
+
 //Allocate Release:
 void asf(int n) {
-    int old_fp = fp;
-    push(old_fp);
+    pushInt(fp);
     fp = sp;
-    sp = sp + n;
+    if (fp + n >= (stackSize * 1024) / sizeof(StackSlot)) {
+        fprintf(stderr, "Error: Stack overflow on stack frame allocation\n");
+        exit(EXIT_FAILURE);
+    }
+    sp = fp + n;
+    for (int i = fp; i < sp; i++) {
+        StackSlot s;
+        s.isObjRef = true;
+        s.u.objRef = NULL;
+        stack[i] = s;
+    }
 }
-void rsf() {
+
+void rsf(void) {
     sp = fp;
-    fp = pop();
+    result = pop();
+    if (result.isObjRef) {
+        fprintf(stderr, "Error: Unexpected ObjRef instead of FP on stack");
+        exit(EXIT_FAILURE);
+    }
+    fp = result.u.number;
 }
-//PUSHL POPL
+
 void pushl(int lokVar) {
-    // push to stack local variable
-    push(stack[fp + lokVar]);
+    if (!stack[fp + lokVar].isObjRef) {
+        fprintf(stderr, "Error: Local variable to be pushed didnt contain object");
+        exit(EXIT_FAILURE);
+    }
+    pushObj(stack[fp + lokVar].u.objRef);
 }
+
 void popl(int lokVar) {
     stack[fp + lokVar] = pop();
 }
+
 //Logic
-void equal() {
-    a = pop();
-    b = pop();
-    if (a == b) {
-        push(1);
-    } else {
-        push(0);
+void equal(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: Operand1 or Operand2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic comparison\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    if (bigCmp() == 0) bigFromInt(1);
+    else bigFromInt(0);
+    pushObj(bip.res);
+}
+
+void nequal(void) {
+    op1 = pop();
+    op2 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: Operand1 or Operand2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic comparison\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    if (bigCmp() != 0) bigFromInt(1);
+    else bigFromInt(0);
+    pushObj(bip.res);
+}
+
+void lessThan(void) {
+    op1 = pop();
+    op2 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: Operand1 or Operand2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic comparison\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    if (bigCmp() < 0) bigFromInt(1);
+    else bigFromInt(0);
+    pushObj(bip.res);
+}
+
+void lessEqual(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic comparison\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    if (bigCmp() <= 0) bigFromInt(1);
+    else bigFromInt(0);
+    pushObj(bip.res);
+}
+
+void greaterThan(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic comparison\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    if (bigCmp() > 0) bigFromInt(1);
+    else bigFromInt(0);
+    pushObj(bip.res);
+}
+
+void greatEqual(void) {
+    op2 = pop();
+    op1 = pop();
+    if (!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        exit(EXIT_FAILURE);
+    }
+    if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
+        fprintf(stderr, "Error: Non-primitive object in arithmetic comparison\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = op1.u.objRef;
+    bip.op2 = op2.u.objRef;
+    if (bigCmp() >= 0) bigFromInt(1);
+    else bigFromInt(0);
+    pushObj(bip.res);
+}
+
+void branchIfTrue(int target) {
+    if (target >= numberOfInstructions) {
+        fprintf(stderr, "Error: Jump target is higher than amount of instructions");
+        exit(EXIT_FAILURE);
+    }
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "ERROR: result is not an int object.");
+        exit(EXIT_FAILURE);
+    }
+    if (result.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!IS_PRIMITIVE(result.u.objRef)) {
+        fprintf(stderr, "Error: Object is not a primitive object\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = result.u.objRef;
+    int condition = bigToInt();
+    if (!(condition == 0 || condition == 1)) {
+        fprintf(stderr, "Error: Condition for instruction BRF is not a boolean value");
+        exit(EXIT_FAILURE);
+    }
+    if (condition == 1) {
+        pc = target;
     }
 }
-void nequal() {
-    a = pop();
-    b = pop();
-    if (a != b) {
-        push(1);
-    } else {
-        push(0);
+
+void branchIfFalse(int target) {
+    if (target >= numberOfInstructions) {
+        fprintf(stderr, "Error: Jump target is higher than amount of instructions");
+        exit(EXIT_FAILURE);
     }
-}
-void lessThan() {
-    a = pop();
-    b = pop();
-    if (b > a) {
-        push(1);
-    } else {
-        push(0);
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "ERROR: n is not an int object.");
+        exit(EXIT_FAILURE);
     }
-}
-void lessEqual() {
-    a = pop();
-    b = pop();
-    if (b <= a) {
-        push(1);
-    } else {
-        push(0);
+    if (result.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
     }
-}
-void greaterThan() {
-    a = pop();
-    b = pop();
-    if (b > a) {
-        push(1);
-    } else {
-        push(0);
+    if (!IS_PRIMITIVE(result.u.objRef)) {
+        fprintf(stderr, "Error: Object is not a primitive object\n");
+        exit(EXIT_FAILURE);
     }
-}
-void greatEqual() {
-    a = pop();
-    b = pop();
-    if (b >= a) {
-        push(1);
-    } else {
-        push(0);
+    bip.op1 = result.u.objRef;
+    int condition = bigToInt();
+    if (!(condition == 0 || condition == 1)) {
+        fprintf(stderr, "Error: Condition for instruction BRF is not a boolean value");
+        exit(EXIT_FAILURE);
     }
+    if (condition == 0) pc = target;
 }
-void branchIfTrue(int a) {
-    b = pop();
-    if (b == 1) pc = a;
-}
-void branchIfFalse(int x) {
-    b = pop();
-    if (b == 0) pc = x;
-}
+
 //jump
-void jmp(int x) {
-    pc = x;
+void jmp(int target) {
+    if (target >= numberOfInstructions) {
+        fprintf(stderr, "Error: Jump target is higher than amount of instructions");
+        exit(EXIT_FAILURE);
+    }
+    pc = target;
 }
+
 //call & return
-void call(int x) {
-    push(pc);
-    pc = x;
+void call(int target) {
+    if (target >= numberOfInstructions) {
+        fprintf(stderr, "Error: Jump target for CALL is higher than amount of instructions");
+        exit(EXIT_FAILURE);
+    }
+    pushInt(pc);
+    pc = target;
 }
+
 void ret() {
-    pc = pop();
+    result = pop();
+    if (result.isObjRef) {
+        fprintf(stderr, "Error: Unexpected ObjRef instead of RA on stack");
+        exit(EXIT_FAILURE);
+    }
+    pc = result.u.number;
 }
 
 void drop(int n) {
     int ct;
-    for(ct=0;ct<n;ct++){
+    for (ct = 0; ct < n; ct++) {
         pop();
     }
 }
 
-void pushr() {
-    push(returnValue);
+void pushr(void) {
+    pushObj(rvr);
 }
 
-void popr() {
-    returnValue = pop();
+void popr(void) {
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    rvr = result.u.objRef;
 }
 
-void dup() {
-    int x;
-    x = pop();
-    push(x);
-    push(x);
+void dup(void) {
+    result = pop();
+    if (!result.isObjRef) {
+        pushInt(result.u.number);
+        pushInt(result.u.number);
+
+    } else {
+        pushObj(result.u.objRef);
+        pushObj(result.u.objRef);
+    }
+}
+
+void new(int val) {
+    pushObj(newCompoundObject(val));
+}
+
+void getf(int val) {
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if (result.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (IS_PRIMITIVE(result.u.objRef)) {
+        fprintf(stderr, "Error: Object is not a compound object\n");
+        exit(EXIT_FAILURE);
+    }
+    if (val >= GET_ELEMENT_COUNT(result.u.objRef) || val < 0) {
+        fprintf(stderr, "Error: Index is higher than number of objects\n");
+        exit(EXIT_FAILURE);
+    }
+    pushObj(((ObjRef *) result.u.objRef->data)[val]);
+}
+
+void putf(int val) {
+    value = pop();
+    object = pop();
+    if (!(value.isObjRef && object.isObjRef)) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if (object.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (IS_PRIMITIVE(object.u.objRef)) {
+        fprintf(stderr, "Error: Object is not a compound object\n");
+        exit(EXIT_FAILURE);
+    }
+    if (val >= GET_ELEMENT_COUNT(object.u.objRef) || val < 0) {
+        fprintf(stderr, "Error: Index is higher than number of objects\n");
+        exit(EXIT_FAILURE);
+    }
+    ((ObjRef *) object.u.objRef->data)[val] = value.u.objRef;
+}
+
+void newa(void) {
+    result = pop();
+    if (!result.isObjRef) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if (result.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!IS_PRIMITIVE(result.u.objRef)) {
+        fprintf(stderr, "Error: Object is not a primitive object\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = result.u.objRef;
+    pushObj(newCompoundObject(bigToInt()));
+}
+
+void getfa(void) {
+    StackSlot index = pop();
+    StackSlot array = pop();
+    if (!(index.isObjRef && array.isObjRef)) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if (index.u.objRef == NULL || array.u.objRef == NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!IS_PRIMITIVE(index.u.objRef)) {
+        fprintf(stderr, "Error: Index is not a primitive object\n");
+        exit(EXIT_FAILURE);
+    }
+    if (IS_PRIMITIVE(array.u.objRef)) {
+        fprintf(stderr, "Error: Array is not a compound object\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = index.u.objRef;
+    int x = bigToInt();
+    if (x >= GET_ELEMENT_COUNT(array.u.objRef) || x < 0) {
+        fprintf(stderr, "Error: Index out of bounds\n");
+        exit(EXIT_FAILURE);
+    }
+    pushObj(((ObjRef *) array.u.objRef->data)[x]);
+}
+
+void putfa(void){
+    StackSlot value = pop();
+    StackSlot index = pop();
+    StackSlot array = pop();
+    if(!(value.isObjRef&&index.isObjRef&&array.isObjRef)) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if(index.u.objRef==NULL||array.u.objRef==NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if(IS_PRIMITIVE(array.u.objRef)) {
+        fprintf(stderr, "Error: Array is not a compound object\n");
+        exit(EXIT_FAILURE);
+    }
+    if(!IS_PRIMITIVE(index.u.objRef)) {
+        fprintf(stderr, "Error: Index is not a primitive object\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = index.u.objRef;
+    int x = bigToInt();
+    if(x>=GET_ELEMENT_COUNT(array.u.objRef)||x<0) {
+        fprintf(stderr, "Error: Index is higher than number of objects\n");
+        exit(EXIT_FAILURE);
+    }
+    ((ObjRef *)array.u.objRef->data)[x] = value.u.objRef;
+}
+
+void getsz(void){
+    StackSlot value = pop();
+    StackSlot index = pop();
+    StackSlot array = pop();
+    if(!(value.isObjRef&&index.isObjRef&&array.isObjRef)) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if(index.u.objRef==NULL||array.u.objRef==NULL) {
+        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        exit(EXIT_FAILURE);
+    }
+    if(IS_PRIMITIVE(array.u.objRef)) {
+        fprintf(stderr, "Error: Array is not a compound object\n");
+        exit(EXIT_FAILURE);
+    }
+    if(!IS_PRIMITIVE(index.u.objRef)) {
+        fprintf(stderr, "Error: Index is not a primitive object\n");
+        exit(EXIT_FAILURE);
+    }
+    bip.op1 = index.u.objRef;
+    int x = bigToInt();
+    if(x>=GET_ELEMENT_COUNT(array.u.objRef)||x<0) {
+        fprintf(stderr, "Error: Index is higher than number of objects\n");
+        exit(EXIT_FAILURE);
+    }
+    ((ObjRef *)array.u.objRef->data)[x] = value.u.objRef;
+}
+
+void pushn(void){
+    pushObj(NULL);
+}
+
+void refeq(void){
+    op1 = pop();
+    op2 = pop();
+    if(!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if(op1.u.objRef == op2.u.objRef) bigFromInt(1);
+    else bigFromInt(0);
+    pushObj(bip.res);
+}
+
+void refne(void){
+    op1 = pop();
+    op2 = pop();
+    if(!(op1.isObjRef && op2.isObjRef)) {
+        fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
+        exit(EXIT_FAILURE);
+    }
+    if(op1.u.objRef == op2.u.objRef) bigFromInt(0);
+    else bigFromInt(1);
+    pushObj(bip.res);
 }
 
 void executable(unsigned int IR) {
@@ -248,7 +741,7 @@ void executable(unsigned int IR) {
     int immediate = SIGN_EXTEND(IMMEDIATE(IR));
     switch (instruction) {
         case PUSHC:
-            push(immediate);
+
             break;
         case ADD:
             add();
@@ -335,12 +828,43 @@ void executable(unsigned int IR) {
             pushr();
             break;
         case POPR:
-            popr(immediate);
+            popr();
             break;
         case DUP:
+            dup();
+            break;
+        case NEW:
+            new(immediate);
+            break;
+        case GETF:
+            getf(immediate);
+            break;
+        case PUTF:
+            putf(immediate);
+            break;
+        case NEWA:
+            newa();
+            break;
+        case GETFA:
+            getfa();
+            break;
+        case PUTFA:
+            putfa();
+            break;
+        case GETSZ:
+            getsz();
+            break;
+        case PUSHN:
+            pushn();
+            break;
+        case REFEQ:
+            refeq();
+            break;
+        case REFNE:
+            refne();
             break;
         case HALT:
-
+            halt();
             break;
     }
 }
@@ -470,7 +994,8 @@ void execute() {
     } while (IR >> 24 != HALT);
 
 }
-void workWithFile(int argc,char *argv[]){
+
+void workWithFile(int argc, char *argv[]) {
     if (argv[1] != NULL) {
         fileName = argv[1];
         file = fopen(fileName, "r");
@@ -526,7 +1051,7 @@ int main(int argc, char *argv[]) {
 
     printf("Ninja Virtual Machine started\n");
 
-    workWithFile(argc,argv);
+    workWithFile(argc, argv);
 
 
     printf("Ninja Virtual Machine stopped\n");

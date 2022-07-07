@@ -1,4 +1,5 @@
-
+#include <stdbool.h>
+#include "bigint/include/support.h"
 
 #ifndef HAUSUEBUNG_OPCODES_H
 #define HAUSUEBUNG_OPCODES_H
@@ -47,4 +48,18 @@
 #define OP_CODE(instr) ((instr)>>24)
 #define IMMEDIATE(x) ((x)&0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
+#define MSB (1 << (8 * sizeof(unsigned int) - 1))
+#define IS_PRIMITIVE(objRef) (((objRef)->size & MSB) == 0)
+#define GET_ELEMENT_COUNT(objRef) ((objRef)->size & ~MSB)
+
+extern unsigned int stackSize;
+
+typedef struct {
+    bool isObjRef;
+    union {
+        ObjRef objRef;
+        int number;
+    } u;
+} StackSlot;
+
 #endif //HAUSUEBUNG_OPCODES_H
