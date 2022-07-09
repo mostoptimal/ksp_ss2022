@@ -1,15 +1,12 @@
 
 #include <stdio.h>
 #include "opCodes.h"
-
-//int stack[100000];
+extern ObjRef rvr;
 int sp = 0;
-unsigned int stackSize = 100;
+//unsigned int stackSize = 100;
 
 StackSlot *stack;
 extern ObjRef *sdaPtr;
-
-extern
 
 void pushInt(int x) {
     if (sp == (stackSize * 1024) / sizeof(StackSlot)) {

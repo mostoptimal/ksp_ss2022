@@ -45,6 +45,7 @@
 #define PUSHN 39
 #define REFEQ 40
 #define REFNE 41
+
 #define OP_CODE(instr) ((instr)>>24)
 #define IMMEDIATE(x) ((x)&0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))

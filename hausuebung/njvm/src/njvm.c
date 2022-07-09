@@ -5,84 +5,47 @@
 #include "bigint/include/support.h"
 #include <stdbool.h>
 #include "bigint/include/bigint.h"
-#include "instructs.h"
-
-#define HALT 0
-#define PUSHC 1
-#define ADD 2
-#define SUB 3
-#define MUL 4
-#define DIV 5
-#define MOD 6
-#define RDINT 7
-#define WRINT 8
-#define RDCHR 9
-#define WRCHR 10
-#define PUSHG 11
-#define POPG 12
-#define ASF 13
-#define RSF 14
-#define PUSHL 15
-#define POPL 16
-#define EQ 17
-#define NE 18
-#define LT 19
-#define LE 20
-#define GT 21
-#define GE 22
-#define JMP 23
-#define BRF 24
-#define BRT 25
-#define CALL 26
-#define RET 27
-#define DROP 28
-#define PUSHR 29
-#define POPR 30
-#define DUP 31
-#define NEW 32
-#define GETF 33
-#define PUTF 34
-#define NEWA 35
-#define GETFA 36
-#define PUTFA 37
-#define GETSZ 38
-#define PUSHN 39
-#define REFEQ 40
-#define REFNE 41
-#define SIGN_EXTEND(i) ((i)&0x00800000 ? (i) | 0xFF000000 : (i))
-#define IMMEDIATE(x) ((x)&0x00FFFFFF)
-
+#include "garbCollect.h"
 
 
 //#define STACK_SIZE 100;
-
 FILE *file;
 char *fileName;
 int version;
 int *programMemory;
 //int *sda;
+ObjRef *sdaPointer = NULL;
 int pc = 0;
 unsigned int counter = 0;
 int fp = 0;
 int numberOfInstructions;
 int numberOfVariables;
-//int returnValue;
-
-
-
-StackSlot stack[stackSize]; // ehemals int stack[STACK_SIZE]
-
-// SDA
-size_t sda_size = numberOfVariables * sizeof(ObjRef); // 8 Byte
-ObjRef *sda = malloc(sda_size); // array - sda_size is known!
+unsigned int sda_size = 0;
 // RVR
-ObjRef rvr; // single object
+//int returnValue;
+ObjRef rvr = NULL;
+//ObjRef rvr;
 
+StackSlot *stack;
 
-StackSlot op1, op2, result, object, value;
+StackSlot op1, op2, result, object, v;
 
 void halt(void) {
     exit(0);
+}
+
+ObjRef newCompoundObj(int numObjRefs) {
+    ObjRef compObj;
+    int objSize = sizeof(int) + sizeof(char) /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
+    //round up to multiples of 4
+    //if(objSize%4>0) objSize = ((objSize/4)*4)+4;
+    compObj = alloc(objSize);
+    compObj->size = MSB | numObjRefs;
+    //compObj->brokenHeart = 0;
+    for (int i = 0; i < numObjRefs; i++) {
+        ((ObjRef *) compObj->data)[i] = NULL;
+    }
+    return compObj;
 }
 
 void add(void) {
@@ -242,7 +205,7 @@ void wrchr(void) {
     printf("%c", bigToInt());
 }
 
-void pushc(int element){
+void pushc(int element) {
     bigFromInt(element);
     pushObj(bip.res);
 }
@@ -557,8 +520,9 @@ void dup(void) {
     }
 }
 
+// Hausuebung 02 Instructions
 void new(int val) {
-    pushObj(newCompoundObject(val));
+    pushObj(newCompoundObj(val));
 }
 
 void getf(int val) {
@@ -583,9 +547,9 @@ void getf(int val) {
 }
 
 void putf(int val) {
-    value = pop();
+    v = pop();
     object = pop();
-    if (!(value.isObjRef && object.isObjRef)) {
+    if (!(v.isObjRef && object.isObjRef)) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
@@ -601,7 +565,7 @@ void putf(int val) {
         fprintf(stderr, "Error: Index is higher than number of objects\n");
         exit(EXIT_FAILURE);
     }
-    ((ObjRef *) object.u.objRef->data)[val] = value.u.objRef;
+    ((ObjRef *) object.u.objRef->data)[val] = v.u.objRef;
 }
 
 void newa(void) {
@@ -619,7 +583,7 @@ void newa(void) {
         exit(EXIT_FAILURE);
     }
     bip.op1 = result.u.objRef;
-    pushObj(newCompoundObject(bigToInt()));
+    pushObj(newCompoundObj(bigToInt()));
 }
 
 void getfa(void) {
@@ -650,98 +614,99 @@ void getfa(void) {
     pushObj(((ObjRef *) array.u.objRef->data)[x]);
 }
 
-void putfa(void){
+void putfa(void) {
     StackSlot value = pop();
     StackSlot index = pop();
     StackSlot array = pop();
-    if(!(value.isObjRef&&index.isObjRef&&array.isObjRef)) {
+    if (!(value.isObjRef && index.isObjRef && array.isObjRef)) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
-    if(index.u.objRef==NULL||array.u.objRef==NULL) {
+    if (index.u.objRef == NULL || array.u.objRef == NULL) {
         fprintf(stderr, "Error: Trying to access NIL-pointer\n");
         exit(EXIT_FAILURE);
     }
-    if(IS_PRIMITIVE(array.u.objRef)) {
+    if (IS_PRIMITIVE(array.u.objRef)) {
         fprintf(stderr, "Error: Array is not a compound object\n");
         exit(EXIT_FAILURE);
     }
-    if(!IS_PRIMITIVE(index.u.objRef)) {
+    if (!IS_PRIMITIVE(index.u.objRef)) {
         fprintf(stderr, "Error: Index is not a primitive object\n");
         exit(EXIT_FAILURE);
     }
     bip.op1 = index.u.objRef;
     int x = bigToInt();
-    if(x>=GET_ELEMENT_COUNT(array.u.objRef)||x<0) {
+    if (x >= GET_ELEMENT_COUNT(array.u.objRef) || x < 0) {
         fprintf(stderr, "Error: Index is higher than number of objects\n");
         exit(EXIT_FAILURE);
     }
-    ((ObjRef *)array.u.objRef->data)[x] = value.u.objRef;
+    ((ObjRef *) array.u.objRef->data)[x] = value.u.objRef;
 }
 
-void getsz(void){
+void getsz(void) {
     StackSlot value = pop();
     StackSlot index = pop();
     StackSlot array = pop();
-    if(!(value.isObjRef&&index.isObjRef&&array.isObjRef)) {
+    if (!(value.isObjRef && index.isObjRef && array.isObjRef)) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
-    if(index.u.objRef==NULL||array.u.objRef==NULL) {
+    if (index.u.objRef == NULL || array.u.objRef == NULL) {
         fprintf(stderr, "Error: Trying to access NIL-pointer\n");
         exit(EXIT_FAILURE);
     }
-    if(IS_PRIMITIVE(array.u.objRef)) {
+    if (IS_PRIMITIVE(array.u.objRef)) {
         fprintf(stderr, "Error: Array is not a compound object\n");
         exit(EXIT_FAILURE);
     }
-    if(!IS_PRIMITIVE(index.u.objRef)) {
+    if (!IS_PRIMITIVE(index.u.objRef)) {
         fprintf(stderr, "Error: Index is not a primitive object\n");
         exit(EXIT_FAILURE);
     }
     bip.op1 = index.u.objRef;
     int x = bigToInt();
-    if(x>=GET_ELEMENT_COUNT(array.u.objRef)||x<0) {
+    if (x >= GET_ELEMENT_COUNT(array.u.objRef) || x < 0) {
         fprintf(stderr, "Error: Index is higher than number of objects\n");
         exit(EXIT_FAILURE);
     }
-    ((ObjRef *)array.u.objRef->data)[x] = value.u.objRef;
+    ((ObjRef *) array.u.objRef->data)[x] = value.u.objRef;
 }
 
-void pushn(void){
+void pushn(void) {
     pushObj(NULL);
 }
 
-void refeq(void){
+void refeq(void) {
     op1 = pop();
     op2 = pop();
-    if(!(op1.isObjRef && op2.isObjRef)) {
+    if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
-    if(op1.u.objRef == op2.u.objRef) bigFromInt(1);
+    if (op1.u.objRef == op2.u.objRef) bigFromInt(1);
     else bigFromInt(0);
     pushObj(bip.res);
 }
 
-void refne(void){
+void refne(void) {
     op1 = pop();
     op2 = pop();
-    if(!(op1.isObjRef && op2.isObjRef)) {
+    if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
-    if(op1.u.objRef == op2.u.objRef) bigFromInt(0);
+    if (op1.u.objRef == op2.u.objRef) bigFromInt(0);
     else bigFromInt(1);
     pushObj(bip.res);
 }
+
 
 void executable(unsigned int IR) {
     unsigned int instruction = IR >> 24;
     int immediate = SIGN_EXTEND(IMMEDIATE(IR));
     switch (instruction) {
         case PUSHC:
-
+            pushc(immediate);
             break;
         case ADD:
             add();
@@ -865,6 +830,9 @@ void executable(unsigned int IR) {
             break;
         case HALT:
             halt();
+            break;
+        default:
+            printf("not Ninja Instruction!");
             break;
     }
 }
@@ -1032,7 +1000,11 @@ void workWithFile(int argc, char *argv[]) {
         fread(&numberOfVariables, sizeof(int), 1, file);
         if (numberOfVariables > 0) {
             //SDA Allocate for Public Variables
-            sda = malloc(numberOfVariables * sizeof(int));
+            sda_size = numberOfVariables;
+            sdaPointer = malloc(sda_size * sizeof(ObjRef));
+        }
+        for (int i = 0; i < sda_size; i++) {
+            sdaPtr[i] = NULL;
         }
 
         /**5th Step: reading the rest of File */
@@ -1048,11 +1020,9 @@ void workWithFile(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-
     printf("Ninja Virtual Machine started\n");
 
     workWithFile(argc, argv);
-
 
     printf("Ninja Virtual Machine stopped\n");
     return 0;
