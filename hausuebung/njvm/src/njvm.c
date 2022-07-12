@@ -7,6 +7,9 @@
 #include "bigint/include/bigint.h"
 #include "garbCollect.h"
 
+// todo  all  function  is i code from aufgaben
+
+//#define STACK_SIZE 100;
 FILE *file;
 char *fileName;
 int version;
@@ -34,9 +37,10 @@ void halt(void) {
 
 ObjRef newCompoundObj(int numObjRefs) {
     ObjRef compObj;
-    int objSize = sizeof(int) + sizeof(char) /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
+    int objSize =  sizeof(char)+sizeof(int)  /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
     compObj = allocate(objSize);
     compObj->size = MSB | numObjRefs;
+    //all date to null intizialize wie in der aufgabe
     for (int i = 0; i < numObjRefs; i++) {
         ((ObjRef *) compObj->data)[i] = NULL;
     }
@@ -44,18 +48,19 @@ ObjRef newCompoundObj(int numObjRefs) {
 }
 
 void add(void) {
+    //always prove of the op1 and op2 haben ein pointer from objekt and  wert
     op2 = pop();
     op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
-        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        fprintf(stderr, "ERROR: op1 or op2  not an object.");
         exit(EXIT_FAILURE);
     }
     if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
-        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        fprintf(stderr, "ERROR: Trying to access NIL-pointer\n");
         exit(EXIT_FAILURE);
     }
     if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
-        fprintf(stderr, "Error: Non-primitive object in arithmetic operation\n");
+        fprintf(stderr, "ERROR: Non-primitive object in arithmetic operation\n");
         exit(EXIT_FAILURE);
     }
     bip.op1 = op1.u.objRef;
@@ -68,15 +73,15 @@ void sub(void) {
     op2 = pop();
     op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
-        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        fprintf(stderr, "ERROR: op1 or op2  not an object.");
         exit(EXIT_FAILURE);
     }
     if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
-        fprintf(stderr, "Error: Trying to access NIL-pointer\n");
+        fprintf(stderr, "ERROR: Trying to access NIL-pointer\n");
         exit(EXIT_FAILURE);
     }
     if (!(IS_PRIMITIVE(op2.u.objRef) && IS_PRIMITIVE(op1.u.objRef))) {
-        fprintf(stderr, "Error: Non-primitive object in arithmetic operation\n");
+        fprintf(stderr, "ERROR: Non-primitive object in arithmetic operation\n");
         exit(EXIT_FAILURE);
     }
     bip.op1 = op1.u.objRef;
@@ -89,7 +94,7 @@ void mul(void) {
     op2 = pop();
     op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
-        fprintf(stderr, "ERROR: op1 or op2 is not an object.");
+        fprintf(stderr, "ERROR: op1 or op2  not an object.");
         exit(EXIT_FAILURE);
     }
     if (op2.u.objRef == NULL || op1.u.objRef == NULL) {
@@ -612,6 +617,7 @@ void getfa(void) {
 }
 
 void putfa(void) {
+    // element von stack value, index , array
     StackSlot value = pop();
     StackSlot index = pop();
     StackSlot array = pop();

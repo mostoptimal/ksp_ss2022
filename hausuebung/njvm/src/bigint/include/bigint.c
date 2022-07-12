@@ -14,6 +14,8 @@ typedef struct {
     unsigned char digits[1];
 } Big;
 
+// register for the op1 that way allocation and garbage collector
+
 BIP bip = {
         NULL,
         NULL,
@@ -22,28 +24,30 @@ BIP bip = {
 };
 /*********************************/
 #define BIG_PTR(objRef)            ((Big *) ((objRef)->data))
-#define GET_ND(objRef)            (BIG_PTR(objRef)->nd)
+#define GET_ND(objRef)            (BIG_PTR(objRef)->nd) //value
 #define SET_ND(objRef, val)        (BIG_PTR(objRef)->nd = (val))
 #define GET_SIGN(objRef)        (BIG_PTR(objRef)->sign)
 #define SET_SIGN(objRef, val)        (BIG_PTR(objRef)->sign = (val))
-#define GET_DIGIT(objRef, i)        (BIG_PTR(objRef)->digits[i])
+#define GET_DIGIT(objRef, i)        (BIG_PTR(objRef)->digits[i]) //number
 #define SET_DIGIT(objRef, i, val)    (BIG_PTR(objRef)->digits[i] = (val))
 
 /*********************************/
 static ObjRef newBig(int nd) {
-    int dataSize;
     ObjRef objRef;
+    int dataSize;
     dataSize = sizeof(int) + 1 + nd;
     objRef = newPrimObject(dataSize);
     return objRef;
 }
 
+//change value from obref to  tmp to op1 and | op1 to op2| tmp to op2
 static void bigSwap(void) {
     ObjRef tmp;
     tmp = bip.op1;
     bip.op1 = bip.op2;
     bip.op2 = tmp;
 }
+
 
 static int bigUnsignedCompare(void) {
     int nd1;
@@ -635,7 +639,7 @@ void bigFromInt(int value) {
     while (--i >= 0 && GET_DIGIT(bip.res, i) == 0);
     SET_ND(bip.res, i + 1);
 }
-
+// convet the big to integere
 int bigToInt(void) {
     int nd;
     int i;
@@ -692,8 +696,7 @@ void bigPrint(FILE *out) {
     if (GET_SIGN(bip.op1) == BIG_NEGATIVE) {
         fprintf(out, "-");
     }
-    /* number of digits in base 10 = number of digits
-       in base 256 * log10(256), and log10(256) < 2.5  */
+
     nd = 2 * nd + nd / 2;
     bip.rem = bip.op1;
     bigFromInt(10);
