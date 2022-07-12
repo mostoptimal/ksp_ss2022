@@ -4,6 +4,17 @@ extern ObjRef rvr;
 int sp = 0;
 //unsigned int stackSize = 100;
 
+extern unsigned int stackSize;
+
+typedef struct {
+    bool isObjRef;
+    union {
+        ObjRef objRef;
+        int number;
+    } u;
+} StackSlot;
+
+
 StackSlot *stack;
 extern ObjRef *sdaPtr;
 

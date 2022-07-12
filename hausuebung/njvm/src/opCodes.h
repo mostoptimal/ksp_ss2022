@@ -53,14 +53,4 @@
 #define IS_PRIMITIVE(objRef) (((objRef)->size & MSB) == 0)
 #define GET_ELEMENT_COUNT(objRef) ((objRef)->size & ~MSB)
 
-extern unsigned int stackSize;
-
-typedef struct {
-    bool isObjRef;
-    union {
-        ObjRef objRef;
-        int number;
-    } u;
-} StackSlot;
-
 #endif //HAUSUEBUNG_OPCODES_H

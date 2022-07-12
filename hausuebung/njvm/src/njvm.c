@@ -577,6 +577,7 @@ void newa(void) {
         fprintf(stderr, "Error: Object is not a primitive object\n");
         exit(EXIT_FAILURE);
     }
+    //[Stack] ... number_elements --> [Stack]... array
     bip.op1 = result.u.objRef;
     pushObj(newCompoundObj(bigToInt()));
 }
@@ -606,6 +607,7 @@ void getfa(void) {
         fprintf(stderr, "Error: Index out of bounds\n");
         exit(EXIT_FAILURE);
     }
+    //[Stack]... object --> [Stack]... value
     pushObj(((ObjRef *) array.u.objRef->data)[x]);
 }
 
@@ -631,10 +633,12 @@ void putfa(void) {
     }
     bip.op1 = index.u.objRef;
     int x = bigToInt();
+    //check if x out of array range (bigger or smaller)
     if (x >= GET_ELEMENT_COUNT(array.u.objRef) || x < 0) {
         fprintf(stderr, "Error: Index is higher than number of objects\n");
         exit(EXIT_FAILURE);
     }
+    // [Stack]... array index value --> [Stack]...
     ((ObjRef *) array.u.objRef->data)[x] = value.u.objRef;
 }
 
