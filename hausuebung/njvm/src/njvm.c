@@ -7,16 +7,14 @@
 #include "bigint/include/bigint.h"
 #include "garbCollect.h"
 
-
-//#define STACK_SIZE 100;
 FILE *file;
 char *fileName;
 int version;
 int *programMemory;
 //int *sda;
-ObjRef *sdaPointer = NULL;
+ObjRef *sdaPointer;
 int pc = 0;
-unsigned int counter = 0;
+//unsigned int counter = 0;
 int fp = 0;
 int numberOfInstructions;
 int numberOfVariables;
@@ -26,7 +24,7 @@ unsigned int sda_size = 0;
 ObjRef rvr = NULL;
 //ObjRef rvr;
 
-StackSlot *stack;
+//StackSlot *stack;
 
 StackSlot op1, op2, result, object, v;
 
@@ -37,11 +35,8 @@ void halt(void) {
 ObjRef newCompoundObj(int numObjRefs) {
     ObjRef compObj;
     int objSize = sizeof(int) + sizeof(char) /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
-    //round up to multiples of 4
-    //if(objSize%4>0) objSize = ((objSize/4)*4)+4;
-    compObj = alloc(objSize);
+    compObj = allocate(objSize);
     compObj->size = MSB | numObjRefs;
-    //compObj->brokenHeart = 0;
     for (int i = 0; i < numObjRefs; i++) {
         ((ObjRef *) compObj->data)[i] = NULL;
     }
@@ -65,7 +60,7 @@ void add(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    bigAdd();
+    bigAddition();
     pushObj(bip.res);
 }
 
@@ -86,7 +81,7 @@ void sub(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    bigSub();
+    bigSubtraction();
     pushObj(bip.res);
 }
 
@@ -107,7 +102,7 @@ void mul(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    bigMul();
+    bigMultiplication();
     pushObj(bip.res);
 }
 
@@ -128,7 +123,7 @@ void divid(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    bigDiv();
+    bigDivision();
     pushObj(bip.res);
 }
 
@@ -149,7 +144,7 @@ void mod(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    bigDiv();
+    bigDivision();
     pushObj(bip.rem);
 }
 
@@ -289,7 +284,7 @@ void equal(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    if (bigCmp() == 0) bigFromInt(1);
+    if (bigCompare() == 0) bigFromInt(1);
     else bigFromInt(0);
     pushObj(bip.res);
 }
@@ -311,7 +306,7 @@ void nequal(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    if (bigCmp() != 0) bigFromInt(1);
+    if (bigCompare() != 0) bigFromInt(1);
     else bigFromInt(0);
     pushObj(bip.res);
 }
@@ -333,7 +328,7 @@ void lessThan(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    if (bigCmp() < 0) bigFromInt(1);
+    if (bigCompare() < 0) bigFromInt(1);
     else bigFromInt(0);
     pushObj(bip.res);
 }
@@ -355,7 +350,7 @@ void lessEqual(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    if (bigCmp() <= 0) bigFromInt(1);
+    if (bigCompare() <= 0) bigFromInt(1);
     else bigFromInt(0);
     pushObj(bip.res);
 }
@@ -377,7 +372,7 @@ void greaterThan(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    if (bigCmp() > 0) bigFromInt(1);
+    if (bigCompare() > 0) bigFromInt(1);
     else bigFromInt(0);
     pushObj(bip.res);
 }
@@ -399,7 +394,7 @@ void greatEqual(void) {
     }
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
-    if (bigCmp() >= 0) bigFromInt(1);
+    if (bigCompare() >= 0) bigFromInt(1);
     else bigFromInt(0);
     pushObj(bip.res);
 }
@@ -954,7 +949,7 @@ void printInst(unsigned int IR) {
 */
 
 void execute() {
-    int IR = 0;
+    int IR;
     do {
         IR = programMemory[pc];
         pc = pc + 1;

@@ -19,12 +19,12 @@ extern BIP bip;            // registers of the processor
 
 /* big integer functions */
 int bigSgn(void);            //Sign
-int bigCmp(void);            //compare
+int bigCompare(void);            //compare
 void bigNeg(void);            //negate
-void bigAdd(void);
-void bigSub(void);
-void bigMul(void);
-void bigDiv(void);
+void bigAddition(void);
+void bigSubtraction(void);
+void bigMultiplication(void);
+void bigDivision(void);
 
 void bigFromInt(int value);            // from int to Big
 int bigToInt(void);            // from Big to int

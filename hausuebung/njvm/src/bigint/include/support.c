@@ -13,7 +13,7 @@ ObjRef newPrimObject(int dataSize) {
     ObjRef objRef;
     objRef = malloc(objSize);
     objRef->size = objSize;
-    //objRef->brokenHeart = 0;
+    //objRef->brokenHeart_flag = 0;
     return objRef;
 }
 

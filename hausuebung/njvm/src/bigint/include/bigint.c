@@ -5,8 +5,8 @@
 #include <ctype.h>
 #include "bigint.h"
 
-#define BIG_NEGATIVE		((unsigned char) 0)
-#define BIG_POSITIVE		((unsigned char) 1)
+#define BIG_NEGATIVE        ((unsigned char) 0)
+#define BIG_POSITIVE        ((unsigned char) 1)
 
 typedef struct {
     int nd;
@@ -38,37 +38,36 @@ static ObjRef newBig(int nd) {
     return objRef;
 }
 
-static void bigXchg(void) {
+static void bigSwap(void) {
     ObjRef tmp;
     tmp = bip.op1;
     bip.op1 = bip.op2;
     bip.op2 = tmp;
 }
 
-static int bigUcmp(void) {
+static int bigUnsignedCompare(void) {
     int nd1;
     int nd2;
     int diff;
-    // compare sizes
+    // comparing sizes of BigInt
     nd1 = GET_ND(bip.op1);
     nd2 = GET_ND(bip.op2);
     if (nd1 != nd2) {
-        // sizes are different: we know the bigger number
+        // Not Equal Sizes , return the Difference (for bigger one)
         return nd1 - nd2;
     }
-    // sizes are equal: we must look at the digits
+    // Equal Sizes ,// we must look at the digits
     while (nd1--) {
-        diff = (int) GET_DIGIT(bip.op1, nd1) -
-               (int) GET_DIGIT(bip.op2, nd1);
+        diff = (int) GET_DIGIT(bip.op1, nd1) - (int) GET_DIGIT(bip.op2, nd1);
         if (diff != 0) {
             return diff;
         }
     }
-    // numbers are equal
+    // same Sizes
     return 0;
 }
 
-static void bigUadd(void) {
+static void bigUnsignedAddition(void) {
     int nd1;
     int nd2;
     int i;
@@ -81,7 +80,7 @@ static void bigUadd(void) {
     nd2 = GET_ND(bip.op2);
     if (nd1 < nd2) {
         // exchange operands
-        bigXchg();
+        bigSwap();
         i = nd1;
         nd1 = nd2;
         nd2 = i;
@@ -116,11 +115,11 @@ static void bigUadd(void) {
     SET_ND(bip.res, i + 1);
     // restore operands
     if (xchgFlag) {
-        bigXchg();
+        bigSwap();
     }
 }
 
-static void bigUsub(void) {
+static void bigUnsignedSubtraction(void) {
     int nd1;
     int nd2;
     int i;
@@ -147,9 +146,7 @@ static void bigUsub(void) {
     // res = op1 - res
     carry = 0x01;
     for (i = 0; i < nd1; i++) {
-        aux = (unsigned short) GET_DIGIT(bip.op1, i) -
-              (unsigned short) GET_DIGIT(bip.res, i) +
-              carry + 0xFF;
+        aux = (unsigned short) GET_DIGIT(bip.op1, i) - (unsigned short) GET_DIGIT(bip.res, i) + carry + 0xFF;
         SET_DIGIT(bip.res, i, aux & 0xFF);
         carry = aux >> 8;
     }
@@ -159,11 +156,11 @@ static void bigUsub(void) {
     }
     // determine actual size of result
     i = nd1;
-    while (--i >= 0 && GET_DIGIT(bip.res, i) == 0) ;
+    while (--i >= 0 && GET_DIGIT(bip.res, i) == 0);
     SET_ND(bip.res, i + 1);
 }
 
-static void bigUmul(void) {
+static void bigUnsignedMultiplication(void) {
     int nd1;
     int nd2;
     int i, j, k;
@@ -194,7 +191,7 @@ static void bigUmul(void) {
     }
     /* determine actual size of result */
     i = nd1 + nd2;
-    while (--i >= 0 && GET_DIGIT(bip.res, i) == 0) ;
+    while (--i >= 0 && GET_DIGIT(bip.res, i) == 0);
     SET_ND(bip.res, i + 1);
 }
 
@@ -223,7 +220,7 @@ static unsigned char bigUdiv1(unsigned char divisor) {
     }
     /* determine actual size of quotient */
     i = nd;
-    while (--i >= 0 && GET_DIGIT(tmp, i) == 0) ;
+    while (--i >= 0 && GET_DIGIT(tmp, i) == 0);
     SET_ND(tmp, i + 1);
     /* store quotient */
     bip.rem = tmp;
@@ -253,7 +250,7 @@ static void bigUdiv(void) {
         fatalError("division by zero");
     }
     /* check for small dividend */
-    if (bigUcmp() < 0) {
+    if (bigUnsignedCompare() < 0) {
         /* res = 0 */
         bip.res = newBig(0);
         SET_ND(bip.res, 0);
@@ -426,12 +423,12 @@ static void bigUdiv(void) {
     }
     /* finish quotient */
     i = nd3;
-    while (--i >= 0 && GET_DIGIT(tmp, i) == 0) ;
+    while (--i >= 0 && GET_DIGIT(tmp, i) == 0);
     SET_ND(tmp, i + 1);
     bip.res = tmp;
     /* finish and unnormalize remainder */
     i = nd1 + 1;
-    while (--i >= 0 && GET_DIGIT(bip.rem, i) == 0) ;
+    while (--i >= 0 && GET_DIGIT(bip.rem, i) == 0);
     SET_ND(bip.rem, i + 1);
     r = bigUdiv1(scale);
     if (r != 0) {
@@ -458,26 +455,25 @@ int bigSgn(void) {
     }
 }
 
-int bigCmp(void) {
-    if (bip.op1 == NULL ||
-        bip.op2 == NULL) {
+int bigCompare(void) {
+    if (bip.op1 == NULL || bip.op2 == NULL) {
         nilRefException();
     }
     if (GET_SIGN(bip.op1) == BIG_POSITIVE) {
         if (GET_SIGN(bip.op2) == BIG_POSITIVE) {
-            /* op1 >= 0 and op2 >= 0 */
-            return bigUcmp();
+            // op1 >= 0 and op2 >= 0
+            return bigUnsignedCompare();
         } else {
-            /* op1 >= 0 and op2 < 0 */
+            // op1 >= 0 and op2 < 0
             return 1;
         }
     } else {
         if (GET_SIGN(bip.op2) == BIG_POSITIVE) {
-            /* op1 < 0 and op2 >= 0 */
+            // op1 < 0 and op2 >= 0
             return -1;
         } else {
-            /* op1 < 0 and op2 < 0 */
-            return -bigUcmp();
+            // op1 < 0 and op2 < 0
+            return -bigUnsignedCompare();
         }
     }
 }
@@ -489,14 +485,14 @@ void bigNeg(void) {
     if (bip.op1 == NULL) {
         nilRefException();
     }
-    /* make copy of operand */
+    // make copy of operand
     nd = GET_ND(bip.op1);
     bip.res = newBig(nd);
     for (i = 0; i < nd; i++) {
         SET_DIGIT(bip.res, i, GET_DIGIT(bip.op1, i));
     }
     SET_ND(bip.res, nd);
-    /* store inverted sign */
+    // store inverted sign
     if (GET_SIGN(bip.op1) == BIG_NEGATIVE || nd == 0) {
         SET_SIGN(bip.res, BIG_POSITIVE);
     } else {
@@ -504,104 +500,101 @@ void bigNeg(void) {
     }
 }
 
-void bigAdd(void) {
-    if (bip.op1 == NULL ||
-        bip.op2 == NULL) {
+void bigAddition(void) {
+    if (bip.op1 == NULL || bip.op2 == NULL) {
         nilRefException();
     }
     if (GET_SIGN(bip.op1) == BIG_POSITIVE) {
         if (GET_SIGN(bip.op2) == BIG_POSITIVE) {
             /* op1 >= 0 and op2 >= 0 */
-            bigUadd();
+            bigUnsignedAddition();
             SET_SIGN(bip.res, BIG_POSITIVE);
         } else {
             /* op1 >= 0 and op2 < 0 */
-            if (bigUcmp() >= 0) {
+            if (bigUnsignedCompare() >= 0) {
                 /* |op1| >= |op2| */
-                bigUsub();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_POSITIVE);
             } else {
                 /* |op1| < |op2| */
-                bigXchg();
-                bigUsub();
+                bigSwap();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_NEGATIVE);
-                bigXchg();
+                bigSwap();
             }
         }
     } else {
         if (GET_SIGN(bip.op2) == BIG_POSITIVE) {
             /* op1 < 0 and op2 >= 0 */
-            if (bigUcmp() <= 0) {
+            if (bigUnsignedCompare() <= 0) {
                 /* |op1| <= |op2| */
-                bigXchg();
-                bigUsub();
+                bigSwap();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_POSITIVE);
-                bigXchg();
+                bigSwap();
             } else {
                 /* |op1| > |op2| */
-                bigUsub();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_NEGATIVE);
             }
         } else {
             /* op1 < 0 and op2 < 0 */
-            bigUadd();
+            bigUnsignedAddition();
             SET_SIGN(bip.res, BIG_NEGATIVE);
         }
     }
 }
 
-void bigSub(void) {
-    if (bip.op1 == NULL ||
-        bip.op2 == NULL) {
+void bigSubtraction(void) {
+    if (bip.op1 == NULL || bip.op2 == NULL) {
         nilRefException();
     }
     if (GET_SIGN(bip.op1) == BIG_POSITIVE) {
         if (GET_SIGN(bip.op2) == BIG_POSITIVE) {
             /* op1 >= 0 and op2 >= 0 */
-            if (bigUcmp() >= 0) {
+            if (bigUnsignedCompare() >= 0) {
                 /* |op1| >= |op2| */
-                bigUsub();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_POSITIVE);
             } else {
                 /* |op1| < |op2| */
-                bigXchg();
-                bigUsub();
+                bigSwap();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_NEGATIVE);
-                bigXchg();
+                bigSwap();
             }
         } else {
             /* op1 >= 0 and op2 < 0 */
-            bigUadd();
+            bigUnsignedAddition();
             SET_SIGN(bip.res, BIG_POSITIVE);
         }
     } else {
         if (GET_SIGN(bip.op2) == BIG_POSITIVE) {
             /* op1 < 0 and op2 >= 0 */
-            bigUadd();
+            bigUnsignedAddition();
             SET_SIGN(bip.res, BIG_NEGATIVE);
         } else {
             /* op1 < 0 and op2 < 0 */
-            if (bigUcmp() <= 0) {
+            if (bigUnsignedCompare() <= 0) {
                 /* |op1| <= |op2| */
-                bigXchg();
-                bigUsub();
+                bigSwap();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_POSITIVE);
-                bigXchg();
+                bigSwap();
             } else {
                 /* |op1| > |op2| */
-                bigUsub();
+                bigUnsignedSubtraction();
                 SET_SIGN(bip.res, BIG_NEGATIVE);
             }
         }
     }
 }
 
-void bigMul(void) {
-    if (bip.op1 == NULL ||
-        bip.op2 == NULL) {
+void bigMultiplication(void) {
+    if (bip.op1 == NULL || bip.op2 == NULL) {
         nilRefException();
     }
-    bigUmul();
+    bigUnsignedMultiplication();
     if (GET_SIGN(bip.op1) == GET_SIGN(bip.op2) || GET_ND(bip.res) == 0) {
         SET_SIGN(bip.res, BIG_POSITIVE);
     } else {
@@ -609,14 +602,10 @@ void bigMul(void) {
     }
 }
 
-void bigDiv(void) {
-    if (bip.op1 == NULL ||
-        bip.op2 == NULL) {
+void bigDivision(void) {
+    if (bip.op1 == NULL || bip.op2 == NULL) {
         nilRefException();
     }
-    //printf("op1: sign %d, digit %d\n", GET_SIGN(bip.op1), GET_DIGIT(bip.op1, 0));
-    //printf("op2: sign %d, digit %d\n", GET_SIGN(bip.op2), GET_DIGIT(bip.op2, 0));
-
     bigUdiv();
     if (GET_SIGN(bip.op1) == GET_SIGN(bip.op2) || GET_ND(bip.res) == 0) {
         SET_SIGN(bip.res, BIG_POSITIVE);
@@ -632,7 +621,6 @@ void bigDiv(void) {
 
 void bigFromInt(int value) {
     int i;
-
     bip.res = newBig(sizeof(int));
     if (value < 0) {
         value = -value;
@@ -644,7 +632,7 @@ void bigFromInt(int value) {
         SET_DIGIT(bip.res, i, value & 0xFF);
         value >>= 8;
     }
-    while (--i >= 0 && GET_DIGIT(bip.res, i) == 0) ;
+    while (--i >= 0 && GET_DIGIT(bip.res, i) == 0);
     SET_ND(bip.res, i + 1);
 }
 
@@ -657,8 +645,7 @@ int bigToInt(void) {
         nilRefException();
     }
     nd = GET_ND(bip.op1);
-    if (nd > 4 ||
-        (nd == 4 && GET_DIGIT(bip.op1, 3) >= 0x80)) {
+    if (nd > 4 || (nd == 4 && GET_DIGIT(bip.op1, 3) >= 0x80)) {
         fatalError("big integer too big for conversion to int");
     }
     res = 0;
@@ -714,7 +701,7 @@ void bigPrint(FILE *out) {
     bigFromInt(1);
     while (nd != 0) {
         bip.op1 = bip.res;
-        bigUmul();
+        bigUnsignedMultiplication();
         nd--;
     }
     bip.op1 = bip.rem;
@@ -766,11 +753,11 @@ void bigRead(FILE *in) {
     while (isdigit(c)) {
         bip.op1 = bip.res;
         bip.op2 = bip.rem;
-        bigUmul();
+        bigUnsignedMultiplication();
         bip.op1 = bip.res;
         bigFromInt(c - '0');
         bip.op2 = bip.res;
-        bigUadd();
+        bigUnsignedAddition();
         c = fgetc(in);
     }
     ungetc(c, in);

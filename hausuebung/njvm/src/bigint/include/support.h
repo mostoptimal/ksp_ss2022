@@ -9,7 +9,7 @@
 typedef struct {
     unsigned int size;            // byte count of payload data
     void *forwardPointer;
-    char brokenHeart;
+    char brokenHeart_flag;
     unsigned char data[1];        // payload data, size as needed
 } *ObjRef;
 

@@ -55,12 +55,6 @@ build CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o: C_COMPILER__hausuebung_Debug 
   OBJECT_DIR = CMakeFiles/hausuebung.dir
   OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
 
-build CMakeFiles/hausuebung.dir/njvm/src/instructs.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/instructs.c || cmake_object_order_depends_target_hausuebung
-  DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/instructs.c.o.d
-  FLAGS = -g -std=gnu11
-  OBJECT_DIR = CMakeFiles/hausuebung.dir
-  OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
-
 build CMakeFiles/hausuebung.dir/njvm/src/bigint/include/bigint.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/bigint/include/bigint.c || cmake_object_order_depends_target_hausuebung
   DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/bigint/include/bigint.c.o.d
   FLAGS = -g -std=gnu11
@@ -73,8 +67,8 @@ build CMakeFiles/hausuebung.dir/njvm/src/bigint/include/support.c.o: C_COMPILER_
   OBJECT_DIR = CMakeFiles/hausuebung.dir
   OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src/bigint/include
 
-build CMakeFiles/hausuebung.dir/njvm/src/garbageCollector.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/garbageCollector.c || cmake_object_order_depends_target_hausuebung
-  DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/garbageCollector.c.o.d
+build CMakeFiles/hausuebung.dir/njvm/src/garbCollect.c.o: C_COMPILER__hausuebung_Debug /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/njvm/src/garbCollect.c || cmake_object_order_depends_target_hausuebung
+  DEP_FILE = CMakeFiles/hausuebung.dir/njvm/src/garbCollect.c.o.d
   FLAGS = -g -std=gnu11
   OBJECT_DIR = CMakeFiles/hausuebung.dir
   OBJECT_FILE_DIR = CMakeFiles/hausuebung.dir/njvm/src
@@ -87,7 +81,7 @@ build CMakeFiles/hausuebung.dir/njvm/src/garbageCollector.c.o: C_COMPILER__hausu
 #############################################
 # Link the executable hausuebung
 
-build hausuebung: C_EXECUTABLE_LINKER__hausuebung_Debug CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o CMakeFiles/hausuebung.dir/njvm/src/instructs.c.o CMakeFiles/hausuebung.dir/njvm/src/bigint/include/bigint.c.o CMakeFiles/hausuebung.dir/njvm/src/bigint/include/support.c.o CMakeFiles/hausuebung.dir/njvm/src/garbageCollector.c.o
+build hausuebung: C_EXECUTABLE_LINKER__hausuebung_Debug CMakeFiles/hausuebung.dir/njvm/src/njvm.c.o CMakeFiles/hausuebung.dir/njvm/src/bigint/include/bigint.c.o CMakeFiles/hausuebung.dir/njvm/src/bigint/include/support.c.o CMakeFiles/hausuebung.dir/njvm/src/garbCollect.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/hausuebung.dir
   POST_BUILD = :

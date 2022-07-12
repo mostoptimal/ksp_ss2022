@@ -7,7 +7,7 @@
 
 #include "bigint/include/support.h"
 
-ObjRef alloc(int size);
+ObjRef allocate(int size);
 void garbageCollector(void);
 void scan(void);
 void purgePassiveHalfMemory(void);
