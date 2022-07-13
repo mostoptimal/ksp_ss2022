@@ -3,7 +3,7 @@
 #include <string.h>
 #include "stack.h"
 #include <stdbool.h>
-#include "../bigint/build/include/bigint.h"
+#include "./bigint/build/include/bigint.h"
 #include "garbCollect.h"
 #include "opCodes.h"
 

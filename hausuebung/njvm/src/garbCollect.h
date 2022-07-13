@@ -5,7 +5,7 @@
 #ifndef HAUSUEBUNG_GARBCOLLECT_H
 #define HAUSUEBUNG_GARBCOLLECT_H
 
-#include "../bigint/include/support.h"
+#include "./bigint/include/support.h"
 #include "stack.h"
 ObjRef allocate(int size);
 void garbageCollector(void);

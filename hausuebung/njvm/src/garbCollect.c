@@ -6,7 +6,7 @@
 #include <string.h>
 #include "garbCollect.h"
 #include "opCodes.h"
-#include "../bigint/build/include/bigint.h"
+#include "./bigint/build/include/bigint.h"
 
 
 char *freePtr;
@@ -89,7 +89,7 @@ void scan(void) {
             for (int i = 0; i < GET_ELEMENT_COUNT(compObject); i++) {
                 ((ObjRef *) compObject->data)[i] = relocate(((ObjRef *) compObject->data)[i]);
             }
-            scan += sizeof(int) + sizeof(char) + GET_ELEMENT_COUNT(compObject) * (sizeof(ObjRef *));
+            scan += sizeof(int) + sizeof(char) + GET_ELEMENT_COUNT(compObject) * (sizeof(ObjRef * ));
         } else {
             scan += compObject->size;
         }
@@ -141,7 +141,7 @@ ObjRef copyObjectToFreeMem(ObjRef orig) {
     if (IS_PRIMITIVE(orig)) {
         origSize = orig->size;
     } else {
-        origSize = sizeof(int) + sizeof(char) + GET_ELEMENT_COUNT(orig) * (sizeof(ObjRef *));
+        origSize = sizeof(int) + sizeof(char) + GET_ELEMENT_COUNT(orig) * (sizeof(ObjRef * ));
     }
     copyMemory(freePtr, orig, origSize);
     ObjRef returnPtr = (ObjRef) freePtr;
