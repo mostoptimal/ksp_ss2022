@@ -4,7 +4,6 @@
 #include "stack.h"
 #include <stdbool.h>
 #include "../bigint/build/include/bigint.h"
-#include "../bigint/include/support.h"
 #include "garbCollect.h"
 #include "opCodes.h"
 
@@ -39,7 +38,7 @@ void halt(void) {
 
 ObjRef newCompoundObj(int numObjRefs) {
     ObjRef compObj;
-    int objSize =  sizeof(char)+sizeof(int)  /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
+    int objSize = sizeof(char) + sizeof(int)  /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
     compObj = allocate(objSize);
     compObj->size = MSB | numObjRefs;
     //all date to null intizialize wie in der aufgabe
