@@ -4,11 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "bigint/include/support.h"
 #include "garbCollect.h"
 #include "opCodes.h"
-#include "bigint/include/bigint.h"
-#include "stack.h"
+#include "../bigint/build/include/bigint.h"
 
 
 char *freePtr;
@@ -121,7 +119,7 @@ void purgePassiveHalfMemory(void) {
     memset(killPtr, 0x0, heapSize * 1024 / 2);
 }
 
-void copyMemory(char *dest, ObjRef src,unsigned int count) {
+void copyMemory(char *dest, ObjRef src, unsigned int count) {
     for (int i = 0; i < count; i++) {
         dest[i] = ((char *) src)[i];
     }
@@ -129,9 +127,11 @@ void copyMemory(char *dest, ObjRef src,unsigned int count) {
 
 void countObj(void) {
     objCount = 0;
-    char* countPtr = targetPtr;
-    while(countPtr<freePtr) {
-        countPtr += IS_PRIMITIVE((ObjRef) countPtr) ? ((ObjRef) countPtr)->size : sizeof(int) + sizeof(char *) + GET_ELEMENT_COUNT((ObjRef) countPtr) * sizeof(void *);
+    char *countPtr = targetPtr;
+    while (countPtr < freePtr) {
+        countPtr += IS_PRIMITIVE((ObjRef) countPtr) ? ((ObjRef) countPtr)->size : sizeof(int) + sizeof(char *) +
+                                                                                  GET_ELEMENT_COUNT((ObjRef) countPtr) *
+                                                                                  sizeof(void *);
         objCount++;
     }
 }

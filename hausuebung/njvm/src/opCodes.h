@@ -1,8 +1,7 @@
-#include <stdbool.h>
-#include "bigint/include/support.h"
 
 #ifndef HAUSUEBUNG_OPCODES_H
 #define HAUSUEBUNG_OPCODES_H
+
 #define HALT 0
 #define PUSHC 1
 #define ADD 2
