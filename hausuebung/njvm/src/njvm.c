@@ -20,12 +20,11 @@ int numberOfInstructions;
 int numberOfVariables;
 unsigned int sda_size = 0;
 
-// RVR
-ObjRef returnValueRegister = NULL;
+ObjRef returnValueRegister = NULL; // RVR
 
 unsigned int stackSize = 64;
 
-StackSlot op1, op2, result, object, v;
+StackSlot object, v;
 
 /** Stack */
 int stackPointer = 0;
@@ -33,11 +32,13 @@ int framePointer = 0;
 StackSlot *stack;
 ObjRef *sdaPointer;
 
-void push_Int(int someThing) {
+void pushInt(int someThing) {
+    /* Check if the Stack already full N = How Big is Stack / How Big is one Object */
     if (stackPointer == (stackSize * 1024) / sizeof(StackSlot)) {
-        fprintf(stderr, "ERROR: stack overflow - maximum stack size exceeded");
+        fprintf(stderr, "ERROR: stack overflow");
         exit(EXIT_FAILURE);
     }
+    // Stack is not full
     StackSlot s;
     s.isObjRef = false;
     s.u.number = someThing;
@@ -45,10 +46,12 @@ void push_Int(int someThing) {
 }
 
 void push_Object(ObjRef objRef) {
+    /* Check if the Stack already full N = How Big is Stack / How Big is one Object */
     if (stackPointer == (stackSize * 1024) / sizeof(StackSlot)) {
         fprintf(stderr, "ERROR: stack overflow - maximum stack size exceeded\n");
         exit(EXIT_FAILURE);
     }
+    // Stack is not full
     StackSlot s;
     s.isObjRef = true;
     s.u.objRef = objRef;
@@ -56,23 +59,23 @@ void push_Object(ObjRef objRef) {
 }
 
 StackSlot pop(void) {
+    /* Check if Stack is empty */
     if (stackPointer == 0) {
-        fprintf(stderr, "ERROR: stack underflow - no elements in stack");
+        fprintf(stderr, "ERROR: stack underflow - Stack is empty");
         exit(EXIT_FAILURE);
     }
+    // not empty
     return stack[--stackPointer];
 }
 
 
-/*
- * Garbage Collector */
+/******************* Garbage Collector ***************/
 char *freePointer;
 char *targetEndPtr;
 char *targetPointer;
 char *heapPointer;
-unsigned int heapSize;
+unsigned int heapSize = 8192;
 unsigned int sdaSize;
-
 int purge = 0;
 int gcStats = 0;
 int objCount = 0;
@@ -84,7 +87,7 @@ void copyMemory(char *dest, ObjRef src, unsigned int count) {
 }
 
 ObjRef copyObjectToFreeMem(ObjRef orig) {
-    unsigned int origSize;
+    int origSize;
     if (IS_PRIMITIVE(orig)) {
         origSize = orig->size;
     } else {
@@ -100,11 +103,9 @@ void countObj(void) {
     objCount = 0;
     char *countPtr = targetPointer;
     while (countPtr < freePointer) {
-        countPtr += IS_PRIMITIVE((ObjRef) countPtr) ?
-                    ((ObjRef) countPtr)->size :
-                    sizeof(int) + sizeof(char *) +
-                    GET_ELEMENT_COUNT((ObjRef) countPtr) *
-                    sizeof(void *);
+        countPtr += IS_PRIMITIVE((ObjRef) countPtr) ? ((ObjRef) countPtr)->size : sizeof(int) + sizeof(char *) +
+                                                                                  GET_ELEMENT_COUNT((ObjRef) countPtr) *
+                                                                                  sizeof(void *);
         objCount++;
     }
 }
@@ -132,7 +133,7 @@ void purgePassiveHalfMemory(void) {
     memset(killPtr, 0x0, heapSize * 1024 / 2);
 }
 
-void swap() {
+void swap(void) {
     if (targetPointer == heapPointer) {
         targetPointer = targetEndPtr;
         targetEndPtr = heapPointer + (heapSize * 1024);
@@ -193,7 +194,7 @@ void collectGarbage(void) {
     }
 }
 
-extern ObjRef allocate(int size) {
+ObjRef allocate(int size) {
     if (freePointer + size >= targetEndPtr) {
         collectGarbage();
         if (freePointer + size >= targetEndPtr) {
@@ -213,17 +214,12 @@ void fatalError(char *msg) {
 }
 
 
-/* Garbage Collector End */
-
-void halt(void) {
-    exit(0);
-}
+/**** Garbage Collector End */
 
 ObjRef newPrimObject(int dataSize) {
     int objSize = sizeof(int) + sizeof(char) + dataSize;
-    if (dataSize < 8) objSize = sizeof(int) + sizeof(char) + sizeof(void *);
-    //round up to multiples of 4
-    //if(objSize%4>0) objSize = ((objSize/4)*4)+4;
+    if (dataSize < 8)
+        objSize = sizeof(int) + sizeof(char) + sizeof(void *);
     ObjRef objRef;
     objRef = allocate(objSize);
     objRef->size = objSize;
@@ -233,7 +229,7 @@ ObjRef newPrimObject(int dataSize) {
 
 ObjRef newCompoundObj(int numObjRefs) {
     ObjRef compObj;
-    int objSize = sizeof(char) + sizeof(int)  /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
+    int objSize = sizeof(char) + sizeof(int) + numObjRefs * sizeof(void *);
     compObj = allocate(objSize);
     compObj->size = MSB | numObjRefs;
     //all date to null initialize wie in der aufgabe
@@ -243,10 +239,11 @@ ObjRef newCompoundObj(int numObjRefs) {
     return compObj;
 }
 
+/****** */
 void add(void) {
     //always prove of the op1 and op2 haben ein pointer from objekt and  wert
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2  not an object.");
         exit(EXIT_FAILURE);
@@ -266,8 +263,8 @@ void add(void) {
 }
 
 void sub(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2  not an object.");
         exit(EXIT_FAILURE);
@@ -287,8 +284,8 @@ void sub(void) {
 }
 
 void mul(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2  not an object.");
         exit(EXIT_FAILURE);
@@ -308,8 +305,8 @@ void mul(void) {
 }
 
 void divid(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2 is not an object.");
         exit(EXIT_FAILURE);
@@ -329,8 +326,8 @@ void divid(void) {
 }
 
 void mod(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2 is not an object.");
         exit(EXIT_FAILURE);
@@ -355,7 +352,7 @@ void readInt(void) {
 }
 
 void wrint(void) {
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "ERROR: result is not an object.");
         exit(EXIT_FAILURE);
@@ -369,7 +366,6 @@ void wrint(void) {
         exit(EXIT_FAILURE);
     }
     bip.op1 = result.u.objRef;
-    //printf("writing: %d\result", bigToInt());
     bigPrint(stdout);
 }
 
@@ -384,7 +380,7 @@ void rdchr(void) {
 }
 
 void wrchr(void) {
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "ERROR: result is not an object.");
         exit(EXIT_FAILURE);
@@ -420,7 +416,7 @@ void popg(int element) {
         fprintf(stderr, "Invalid position %d in static data area", element);
         exit(EXIT_FAILURE);
     }
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "Stackslot doesnt hold ObjRef");
         exit(EXIT_FAILURE);
@@ -428,15 +424,14 @@ void popg(int element) {
     *(sdaPointer + element) = result.u.objRef;
 }
 
-//Allocate Release:
-void asf(int n) {
-    push_Int(framePointer);
+void asf(int num) {
+    pushInt(framePointer);
     framePointer = stackPointer;
-    if (framePointer + n >= (stackSize * 1024) / sizeof(StackSlot)) {
+    if (framePointer + num >= (stackSize * 1024) / sizeof(StackSlot)) {
         fprintf(stderr, "Error: Stack overflow on stack frame allocation\n");
         exit(EXIT_FAILURE);
     }
-    stackPointer = framePointer + n;
+    stackPointer = framePointer + num;
     for (int i = framePointer; i < stackPointer; i++) {
         StackSlot s;
         s.isObjRef = true;
@@ -447,7 +442,7 @@ void asf(int n) {
 
 void rsf(void) {
     stackPointer = framePointer;
-    result = pop();
+    StackSlot result = pop();
     if (result.isObjRef) {
         fprintf(stderr, "Error: Unexpected ObjRef instead of FP on stack");
         exit(EXIT_FAILURE);
@@ -469,8 +464,8 @@ void popl(int lokVar) {
 
 //Logic
 void equal(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: Operand1 or Operand2 is not an object.");
         exit(EXIT_FAILURE);
@@ -491,8 +486,8 @@ void equal(void) {
 }
 
 void nequal(void) {
-    op1 = pop();
-    op2 = pop();
+    StackSlot op1 = pop();
+    StackSlot op2 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: Operand1 or Operand2 is not an object.");
         exit(EXIT_FAILURE);
@@ -513,8 +508,8 @@ void nequal(void) {
 }
 
 void lessThan(void) {
-    op1 = pop();
-    op2 = pop();
+    StackSlot op1 = pop();
+    StackSlot op2 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: Operand1 or Operand2 is not an object.");
         exit(EXIT_FAILURE);
@@ -535,8 +530,8 @@ void lessThan(void) {
 }
 
 void lessEqual(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2 is not an object.");
         exit(EXIT_FAILURE);
@@ -557,8 +552,8 @@ void lessEqual(void) {
 }
 
 void greaterThan(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2 is not an object.");
         exit(EXIT_FAILURE);
@@ -579,8 +574,8 @@ void greaterThan(void) {
 }
 
 void greatEqual(void) {
-    op2 = pop();
-    op1 = pop();
+    StackSlot op2 = pop();
+    StackSlot op1 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "ERROR: op1 or op2 is not an object.");
         exit(EXIT_FAILURE);
@@ -605,7 +600,7 @@ void branchIfTrue(int target) {
         fprintf(stderr, "Error: Jump target is higher than amount of instructions");
         exit(EXIT_FAILURE);
     }
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "ERROR: result is not an int object.");
         exit(EXIT_FAILURE);
@@ -634,7 +629,7 @@ void branchIfFalse(int target) {
         fprintf(stderr, "Error: Jump target is higher than amount of instructions");
         exit(EXIT_FAILURE);
     }
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "ERROR: n is not an int object.");
         exit(EXIT_FAILURE);
@@ -671,12 +666,12 @@ void call(int target) {
         fprintf(stderr, "Error: Jump target for CALL is higher than amount of instructions");
         exit(EXIT_FAILURE);
     }
-    push_Int(progCounter);
+    pushInt(progCounter);
     progCounter = target;
 }
 
-void ret() {
-    result = pop();
+void ret(void) {
+    StackSlot result = pop();
     if (result.isObjRef) {
         fprintf(stderr, "Error: Unexpected ObjRef instead of RA on stack");
         exit(EXIT_FAILURE);
@@ -696,7 +691,7 @@ void pushr(void) {
 }
 
 void popr(void) {
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
@@ -705,10 +700,10 @@ void popr(void) {
 }
 
 void dup(void) {
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
-        push_Int(result.u.number);
-        push_Int(result.u.number);
+        pushInt(result.u.number);
+        pushInt(result.u.number);
 
     } else {
         push_Object(result.u.objRef);
@@ -722,7 +717,7 @@ void new(int val) {
 }
 
 void getf(int val) {
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
@@ -765,7 +760,7 @@ void putf(int val) {
 }
 
 void newa(void) {
-    result = pop();
+    StackSlot result = pop();
     if (!result.isObjRef) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
@@ -845,32 +840,18 @@ void putfa(void) {
 }
 
 void getsz(void) {
-    StackSlot value = pop();
-    StackSlot index = pop();
-    StackSlot array = pop();
-    if (!(value.isObjRef && index.isObjRef && array.isObjRef)) {
+    StackSlot result = pop();
+    if (!result.isObjRef) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
-    if (index.u.objRef == NULL || array.u.objRef == NULL) {
+    if (result.u.objRef == NULL) {
         fprintf(stderr, "Error: Trying to access NIL-pointer\n");
         exit(EXIT_FAILURE);
     }
-    if (IS_PRIMITIVE(array.u.objRef)) {
-        fprintf(stderr, "Error: Array is not a compound object\n");
-        exit(EXIT_FAILURE);
-    }
-    if (!IS_PRIMITIVE(index.u.objRef)) {
-        fprintf(stderr, "Error: Index is not a primitive object\n");
-        exit(EXIT_FAILURE);
-    }
-    bip.op1 = index.u.objRef;
-    int x = bigToInt();
-    if (x >= GET_ELEMENT_COUNT(array.u.objRef) || x < 0) {
-        fprintf(stderr, "Error: Index is higher than number of objects\n");
-        exit(EXIT_FAILURE);
-    }
-    ((ObjRef *) array.u.objRef->data)[x] = value.u.objRef;
+    if (IS_PRIMITIVE(result.u.objRef)) bigFromInt(-1);
+    else bigFromInt(GET_ELEMENT_COUNT(result.u.objRef));
+    push_Object(bip.res);
 }
 
 void pushn(void) {
@@ -878,8 +859,8 @@ void pushn(void) {
 }
 
 void refeq(void) {
-    op1 = pop();
-    op2 = pop();
+    StackSlot op1 = pop();
+    StackSlot op2 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
@@ -890,14 +871,16 @@ void refeq(void) {
 }
 
 void refne(void) {
-    op1 = pop();
-    op2 = pop();
+    StackSlot op1 = pop();
+    StackSlot op2 = pop();
     if (!(op1.isObjRef && op2.isObjRef)) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
-    if (op1.u.objRef == op2.u.objRef) bigFromInt(0);
-    else bigFromInt(1);
+    if (op1.u.objRef == op2.u.objRef)
+        bigFromInt(0);
+    else
+        bigFromInt(1);
     push_Object(bip.res);
 }
 
@@ -1030,8 +1013,7 @@ void executable(unsigned int IR) {
             refne();
             break;
         case HALT:
-            halt();
-            break;
+            exit(0);
         default:
             printf("not Ninja Instruction!");
             break;
