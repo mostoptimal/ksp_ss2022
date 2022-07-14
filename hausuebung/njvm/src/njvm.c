@@ -11,17 +11,11 @@
 // todo  all  function  is i code from aufgaben
 
 
-int stackPointer;
-int framePointer;
-StackSlot *stack;
 FILE *file;
 char *fileName;
 int version;
 int *programMemory;
-//int *sda;
 int progCounter = 0;
-//unsigned int counter = 0;
-//int framePointer = 0;
 int numberOfInstructions;
 int numberOfVariables;
 unsigned int sda_size = 0;
