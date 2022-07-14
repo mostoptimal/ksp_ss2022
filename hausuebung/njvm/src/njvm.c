@@ -1,39 +1,240 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "stack.h"
 #include <stdbool.h>
 #include "./bigint/build/include/bigint.h"
-#include "garbCollect.h"
 #include "opCodes.h"
+#include "./bigint/include/support.h"
+
+#include "StackSlot.h"
 
 // todo  all  function  is i code from aufgaben
 
-//#define STACK_SIZE 100;
+
+int stackPointer;
+int framePointer;
+StackSlot *stack;
 FILE *file;
 char *fileName;
 int version;
 int *programMemory;
 //int *sda;
-ObjRef *sdaPointer;
-int pc = 0;
+int progCounter = 0;
 //unsigned int counter = 0;
-//int fp = 0;
+//int framePointer = 0;
 int numberOfInstructions;
 int numberOfVariables;
 unsigned int sda_size = 0;
-// RVR
-//int returnValue;
-//ObjRef rvr = NULL;
-//ObjRef rvr;
 
-//StackSlot *stack;
-unsigned int stackSize;
+// RVR
+ObjRef returnValueRegister = NULL;
+
+unsigned int stackSize = 64;
 
 StackSlot op1, op2, result, object, v;
 
+/** Stack */
+int stackPointer = 0;
+int framePointer = 0;
+StackSlot *stack;
+ObjRef *sdaPointer;
+
+void push_Int(int someThing) {
+    if (stackPointer == (stackSize * 1024) / sizeof(StackSlot)) {
+        fprintf(stderr, "ERROR: stack overflow - maximum stack size exceeded");
+        exit(EXIT_FAILURE);
+    }
+    StackSlot s;
+    s.isObjRef = false;
+    s.u.number = someThing;
+    stack[stackPointer++] = s;
+}
+
+void push_Object(ObjRef objRef) {
+    if (stackPointer == (stackSize * 1024) / sizeof(StackSlot)) {
+        fprintf(stderr, "ERROR: stack overflow - maximum stack size exceeded\n");
+        exit(EXIT_FAILURE);
+    }
+    StackSlot s;
+    s.isObjRef = true;
+    s.u.objRef = objRef;
+    stack[stackPointer++] = s;
+}
+
+StackSlot pop(void) {
+    if (stackPointer == 0) {
+        fprintf(stderr, "ERROR: stack underflow - no elements in stack");
+        exit(EXIT_FAILURE);
+    }
+    return stack[--stackPointer];
+}
+
+
+/*
+ * Garbage Collector */
+char *freePointer;
+char *targetEndPtr;
+char *targetPointer;
+char *heapPointer;
+unsigned int heapSize;
+unsigned int sdaSize;
+
+int purge = 0;
+int gcStats = 0;
+int objCount = 0;
+
+void copyMemory(char *dest, ObjRef src, unsigned int count) {
+    for (int i = 0; i < count; i++) {
+        dest[i] = ((char *) src)[i];
+    }
+}
+
+ObjRef copyObjectToFreeMem(ObjRef orig) {
+    unsigned int origSize;
+    if (IS_PRIMITIVE(orig)) {
+        origSize = orig->size;
+    } else {
+        origSize = sizeof(int) + sizeof(char) + GET_ELEMENT_COUNT(orig) * (sizeof(ObjRef *));
+    }
+    copyMemory(freePointer, orig, origSize);
+    ObjRef returnPtr = (ObjRef) freePointer;
+    freePointer += origSize;
+    return returnPtr;
+}
+
+void countObj(void) {
+    objCount = 0;
+    char *countPtr = targetPointer;
+    while (countPtr < freePointer) {
+        countPtr += IS_PRIMITIVE((ObjRef) countPtr) ?
+                    ((ObjRef) countPtr)->size :
+                    sizeof(int) + sizeof(char *) +
+                    GET_ELEMENT_COUNT((ObjRef) countPtr) *
+                    sizeof(void *);
+        objCount++;
+    }
+}
+
+ObjRef relocate(ObjRef orig) {
+    ObjRef copy;
+    if (orig == NULL) {
+        copy = NULL;
+    } else {
+        if (orig->brokenHeart_flag != 0) {
+            copy = ((ObjRef *) orig->data)[0];
+        } else {
+            copy = copyObjectToFreeMem(orig);
+            orig->brokenHeart_flag = 1;
+            ((ObjRef *) orig->data)[0] = copy;
+        }
+    }
+    return copy;
+}
+
+void purgePassiveHalfMemory(void) {
+    char *killPtr;
+    if (targetPointer == heapPointer) killPtr = targetEndPtr;
+    else killPtr = heapPointer;
+    memset(killPtr, 0x0, heapSize * 1024 / 2);
+}
+
+void swap() {
+    if (targetPointer == heapPointer) {
+        targetPointer = targetEndPtr;
+        targetEndPtr = heapPointer + (heapSize * 1024);
+    } else {
+        targetPointer = heapPointer;
+        targetEndPtr = heapPointer + (heapSize * 1024 / 2);
+    }
+    freePointer = targetPointer;
+}
+
+void root(void) {
+    for (int i = 0; i < sdaSize; i++) {
+        sdaPointer[i] = relocate(sdaPointer[i]);
+    }
+    for (int i = 0; i < stackPointer; i++) {
+        if (stack[i].isObjRef) {
+            stack[i].u.objRef = relocate(stack[i].u.objRef);
+        }
+    }
+    returnValueRegister = relocate(returnValueRegister);
+    bip.op1 = relocate(bip.op1);
+    bip.op2 = relocate(bip.op2);
+    bip.res = relocate(bip.res);
+    bip.rem = relocate(bip.rem);
+}
+
+void scan(void) {
+    char *scan = targetPointer;
+    while (scan < freePointer) {
+        ObjRef compObject = (ObjRef) scan;
+        if (!IS_PRIMITIVE(compObject)) {
+            for (int i = 0; i < GET_ELEMENT_COUNT(compObject); i++) {
+                ((ObjRef *) compObject->data)[i] = relocate(((ObjRef *) compObject->data)[i]);
+            }
+            scan += sizeof(int) + sizeof(char) + GET_ELEMENT_COUNT(compObject) * (sizeof(ObjRef *));
+        } else {
+            scan += compObject->size;
+        }
+    }
+}
+
+void collectGarbage(void) {
+    if (gcStats != 0) {
+        printf("Garbage Collector triggered!\n");
+        int oldCount = objCount;
+        countObj();
+        printf("New objects since last run: %d\n", objCount - oldCount);
+    }
+    swap();
+    root();
+    scan();
+    if (purge != 0) purgePassiveHalfMemory();
+    if (gcStats != 0) {
+        countObj();
+        printf("Number of vivid objects: %d\n", objCount);
+        printf("Memory used by vivid objects: %ld\n", (long) freePointer - (long) targetPointer);
+        printf("Free memory: %ld\n\n", (long) targetEndPtr - (long) freePointer);
+    }
+}
+
+extern ObjRef allocate(int size) {
+    if (freePointer + size >= targetEndPtr) {
+        collectGarbage();
+        if (freePointer + size >= targetEndPtr) {
+            fprintf(stderr, "Error: Not enough heap space to allocate new object\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    ObjRef obj;
+    obj = (ObjRef) freePointer;
+    freePointer += size;
+    return obj;
+}
+
+void fatalError(char *msg) {
+    fprintf(stderr, "%s", msg);
+    exit(EXIT_FAILURE);
+}
+
+
+/* Garbage Collector End */
+
 void halt(void) {
     exit(0);
+}
+
+ObjRef newPrimObject(int dataSize) {
+    int objSize = sizeof(int) + sizeof(char) + dataSize;
+    if (dataSize < 8) objSize = sizeof(int) + sizeof(char) + sizeof(void *);
+    //round up to multiples of 4
+    //if(objSize%4>0) objSize = ((objSize/4)*4)+4;
+    ObjRef objRef;
+    objRef = allocate(objSize);
+    objRef->size = objSize;
+    objRef->brokenHeart_flag = 0;
+    return objRef;
 }
 
 ObjRef newCompoundObj(int numObjRefs) {
@@ -41,7 +242,7 @@ ObjRef newCompoundObj(int numObjRefs) {
     int objSize = sizeof(char) + sizeof(int)  /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
     compObj = allocate(objSize);
     compObj->size = MSB | numObjRefs;
-    //all date to null intizialize wie in der aufgabe
+    //all date to null initialize wie in der aufgabe
     for (int i = 0; i < numObjRefs; i++) {
         ((ObjRef *) compObj->data)[i] = NULL;
     }
@@ -67,7 +268,7 @@ void add(void) {
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
     bigAdd();
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void sub(void) {
@@ -88,7 +289,7 @@ void sub(void) {
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
     bigSub();
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void mul(void) {
@@ -109,7 +310,7 @@ void mul(void) {
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
     bigMul();
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void divid(void) {
@@ -130,7 +331,7 @@ void divid(void) {
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
     bigDiv();
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void mod(void) {
@@ -151,12 +352,12 @@ void mod(void) {
     bip.op1 = op1.u.objRef;
     bip.op2 = op2.u.objRef;
     bigDiv();
-    pushObj(bip.rem);
+    push_Object(bip.rem);
 }
 
 void readInt(void) {
     bigRead(stdin);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void wrint(void) {
@@ -185,7 +386,7 @@ void rdchr(void) {
     //fgets(inputBuffer, sizeof(inputBuffer), stdin);
     //sscanf(inputBuffer, "%c", &input);
     bigFromInt((int) eingabe);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void wrchr(void) {
@@ -208,7 +409,7 @@ void wrchr(void) {
 
 void pushc(int element) {
     bigFromInt(element);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void pushg(int element) {
@@ -216,7 +417,7 @@ void pushg(int element) {
         fprintf(stderr, "Invalid position %d in static data area", element);
         exit(EXIT_FAILURE);
     }
-    pushObj(*(sdaPtr + element));
+    push_Object(*(sdaPointer + element));
 }
 
 void popg(int element) {
@@ -230,19 +431,19 @@ void popg(int element) {
         fprintf(stderr, "Stackslot doesnt hold ObjRef");
         exit(EXIT_FAILURE);
     }
-    *(sdaPtr + element) = result.u.objRef;
+    *(sdaPointer + element) = result.u.objRef;
 }
 
 //Allocate Release:
 void asf(int n) {
-    pushInt(fp);
-    fp = sp;
-    if (fp + n >= (stackSize * 1024) / sizeof(StackSlot)) {
+    push_Int(framePointer);
+    framePointer = stackPointer;
+    if (framePointer + n >= (stackSize * 1024) / sizeof(StackSlot)) {
         fprintf(stderr, "Error: Stack overflow on stack frame allocation\n");
         exit(EXIT_FAILURE);
     }
-    sp = fp + n;
-    for (int i = fp; i < sp; i++) {
+    stackPointer = framePointer + n;
+    for (int i = framePointer; i < stackPointer; i++) {
         StackSlot s;
         s.isObjRef = true;
         s.u.objRef = NULL;
@@ -251,25 +452,25 @@ void asf(int n) {
 }
 
 void rsf(void) {
-    sp = fp;
+    stackPointer = framePointer;
     result = pop();
     if (result.isObjRef) {
         fprintf(stderr, "Error: Unexpected ObjRef instead of FP on stack");
         exit(EXIT_FAILURE);
     }
-    fp = result.u.number;
+    framePointer = result.u.number;
 }
 
 void pushl(int lokVar) {
-    if (!stack[fp + lokVar].isObjRef) {
+    if (!stack[framePointer + lokVar].isObjRef) {
         fprintf(stderr, "Error: Local variable to be pushed didnt contain object");
         exit(EXIT_FAILURE);
     }
-    pushObj(stack[fp + lokVar].u.objRef);
+    push_Object(stack[framePointer + lokVar].u.objRef);
 }
 
 void popl(int lokVar) {
-    stack[fp + lokVar] = pop();
+    stack[framePointer + lokVar] = pop();
 }
 
 //Logic
@@ -292,7 +493,7 @@ void equal(void) {
     bip.op2 = op2.u.objRef;
     if (bigCmp() == 0) bigFromInt(1);
     else bigFromInt(0);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void nequal(void) {
@@ -314,7 +515,7 @@ void nequal(void) {
     bip.op2 = op2.u.objRef;
     if (bigCmp() != 0) bigFromInt(1);
     else bigFromInt(0);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void lessThan(void) {
@@ -336,7 +537,7 @@ void lessThan(void) {
     bip.op2 = op2.u.objRef;
     if (bigCmp() < 0) bigFromInt(1);
     else bigFromInt(0);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void lessEqual(void) {
@@ -358,7 +559,7 @@ void lessEqual(void) {
     bip.op2 = op2.u.objRef;
     if (bigCmp() <= 0) bigFromInt(1);
     else bigFromInt(0);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void greaterThan(void) {
@@ -380,7 +581,7 @@ void greaterThan(void) {
     bip.op2 = op2.u.objRef;
     if (bigCmp() > 0) bigFromInt(1);
     else bigFromInt(0);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void greatEqual(void) {
@@ -402,7 +603,7 @@ void greatEqual(void) {
     bip.op2 = op2.u.objRef;
     if (bigCmp() >= 0) bigFromInt(1);
     else bigFromInt(0);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void branchIfTrue(int target) {
@@ -430,7 +631,7 @@ void branchIfTrue(int target) {
         exit(EXIT_FAILURE);
     }
     if (condition == 1) {
-        pc = target;
+        progCounter = target;
     }
 }
 
@@ -458,7 +659,7 @@ void branchIfFalse(int target) {
         fprintf(stderr, "Error: Condition for instruction BRF is not a boolean value");
         exit(EXIT_FAILURE);
     }
-    if (condition == 0) pc = target;
+    if (condition == 0) progCounter = target;
 }
 
 //jump
@@ -467,7 +668,7 @@ void jmp(int target) {
         fprintf(stderr, "Error: Jump target is higher than amount of instructions");
         exit(EXIT_FAILURE);
     }
-    pc = target;
+    progCounter = target;
 }
 
 //call & return
@@ -476,8 +677,8 @@ void call(int target) {
         fprintf(stderr, "Error: Jump target for CALL is higher than amount of instructions");
         exit(EXIT_FAILURE);
     }
-    pushInt(pc);
-    pc = target;
+    push_Int(progCounter);
+    progCounter = target;
 }
 
 void ret() {
@@ -486,7 +687,7 @@ void ret() {
         fprintf(stderr, "Error: Unexpected ObjRef instead of RA on stack");
         exit(EXIT_FAILURE);
     }
-    pc = result.u.number;
+    progCounter = result.u.number;
 }
 
 void drop(int n) {
@@ -497,7 +698,7 @@ void drop(int n) {
 }
 
 void pushr(void) {
-    pushObj(rvr);
+    push_Object(returnValueRegister);
 }
 
 void popr(void) {
@@ -506,24 +707,24 @@ void popr(void) {
         fprintf(stderr, "Error: Stackslot doesnt hold ObjRef\n");
         exit(EXIT_FAILURE);
     }
-    rvr = result.u.objRef;
+    returnValueRegister = result.u.objRef;
 }
 
 void dup(void) {
     result = pop();
     if (!result.isObjRef) {
-        pushInt(result.u.number);
-        pushInt(result.u.number);
+        push_Int(result.u.number);
+        push_Int(result.u.number);
 
     } else {
-        pushObj(result.u.objRef);
-        pushObj(result.u.objRef);
+        push_Object(result.u.objRef);
+        push_Object(result.u.objRef);
     }
 }
 
 // Hausuebung 02 Instructions
 void new(int val) {
-    pushObj(newCompoundObj(val));
+    push_Object(newCompoundObj(val));
 }
 
 void getf(int val) {
@@ -544,7 +745,7 @@ void getf(int val) {
         fprintf(stderr, "Error: Index is higher than number of objects\n");
         exit(EXIT_FAILURE);
     }
-    pushObj(((ObjRef *) result.u.objRef->data)[val]);
+    push_Object(((ObjRef *) result.u.objRef->data)[val]);
 }
 
 void putf(int val) {
@@ -585,7 +786,7 @@ void newa(void) {
     }
     //[Stack] ... number_elements --> [Stack]... array
     bip.op1 = result.u.objRef;
-    pushObj(newCompoundObj(bigToInt()));
+    push_Object(newCompoundObj(bigToInt()));
 }
 
 void getfa(void) {
@@ -614,7 +815,7 @@ void getfa(void) {
         exit(EXIT_FAILURE);
     }
     //[Stack]... object --> [Stack]... value
-    pushObj(((ObjRef *) array.u.objRef->data)[x]);
+    push_Object(((ObjRef *) array.u.objRef->data)[x]);
 }
 
 void putfa(void) {
@@ -679,7 +880,7 @@ void getsz(void) {
 }
 
 void pushn(void) {
-    pushObj(NULL);
+    push_Object(NULL);
 }
 
 void refeq(void) {
@@ -691,7 +892,7 @@ void refeq(void) {
     }
     if (op1.u.objRef == op2.u.objRef) bigFromInt(1);
     else bigFromInt(0);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 void refne(void) {
@@ -703,7 +904,7 @@ void refne(void) {
     }
     if (op1.u.objRef == op2.u.objRef) bigFromInt(0);
     else bigFromInt(1);
-    pushObj(bip.res);
+    push_Object(bip.res);
 }
 
 
@@ -962,8 +1163,8 @@ void printInst(unsigned int IR) {
 void execute() {
     int IR;
     do {
-        IR = programMemory[pc];
-        pc = pc + 1;
+        IR = programMemory[progCounter];
+        progCounter = progCounter + 1;
         executable(IR);
     } while (IR >> 24 != HALT);
 
@@ -1010,7 +1211,7 @@ void workWithFile(int argc, char *argv[]) {
             sdaPointer = malloc(sda_size * sizeof(ObjRef));
         }
         for (int i = 0; i < sda_size; i++) {
-            sdaPtr[i] = NULL;
+            sdaPointer[i] = NULL;
         }
 
         /**5th Step: reading the rest of File */

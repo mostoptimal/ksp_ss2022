@@ -1,13 +1,4 @@
 /home/mohamad/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5921.27/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/mohamad/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5921.27/bin/ninja/linux/ninja -G Ninja -S /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung -B /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug
 -- Configuring done
-CMake Error at CMakeLists.txt:6 (add_executable):
-  Cannot find source file:
-
-    njvm/src/bigint/include/support.h
-
-
-CMake Error at CMakeLists.txt:6 (add_executable):
-  No SOURCES given to target: hausuebung
-
-
-CMake Generate step failed.  Build files cannot be regenerated correctly.
+-- Generating done
+-- Build files have been written to: /home/mohamad/Downloads/THM/6.SoSe22/KSP/Aufgaben/hausuebung/cmake-build-debug
