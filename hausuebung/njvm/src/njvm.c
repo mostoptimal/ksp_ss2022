@@ -45,10 +45,11 @@ typedef struct {
 StackSlot *stack;
 
 void pushInt(int value) {
-    unsigned int defaultStackSize = stackSize * 1024;
-    int numOfObjects = (defaultStackSize) / sizeof(StackSlot);
+    //vale from vorlesung 1024 mal size of stacslot
+    unsigned int defaultmaxStackSize = stackSize * 1024;
+    int numOfObjects = (defaultmaxStackSize) / sizeof(StackSlot);
     if (stackPointer == numOfObjects) {
-        fprintf(stderr, "ERROR: stack overflow - maximum stack size exceeded");
+        fprintf(stderr, "ERROR: stack overflow - maximum stack size ");
         exit(EXIT_FAILURE);
     }
     StackSlot intAsObject;
@@ -58,22 +59,22 @@ void pushInt(int value) {
 }
 
 void pushObj(ObjRef objRef) {
+
+
     unsigned int defaultStackSize = stackSize * 1024;
     if (stackPointer == (defaultStackSize) / sizeof(StackSlot)) {
-        fprintf(stderr, "ERROR: stack overflow - maximum stack size exceeded\n");
+        fprintf(stderr, "ERROR: stack overflow - maximum stack size \n");
         exit(EXIT_FAILURE);
     }
     StackSlot s;
     s.isObjRef = true;
     s.u.objRef = objRef;
     stack[stackPointer++] = s;
-    //bip.op1 = stack[stackPointer-1].u.objRef;
-    //printf("pushed: %d\n", bigToInt());
+
 }
 
 StackSlot pop() {
     // Pop values are not being deleted, they are set to 0
-    // printf("Popped value %d at index %d", stack[stackPointer-1], stackPointer);
     if (stackPointer == 0) {
         fprintf(stderr, "ERROR: stack underflow - no elements in stack");
         exit(EXIT_FAILURE);
@@ -92,6 +93,7 @@ void fatalError(char *msg) {
 
 //switches the used half of the heap
 void swap(void) {
+    //change pointer from gc
     if (targetPtr == heapPtr) {
         targetPtr = targetEndPtr;
         //targetPtr = targetPtr + heapSize*1024/2;
