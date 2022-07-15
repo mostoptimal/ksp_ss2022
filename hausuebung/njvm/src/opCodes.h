@@ -1,7 +1,28 @@
+//
+// Created by Daniel Spengler on 28.11.2020.
+//
 
-#ifndef HAUSUEBUNG_OPCODES_H
-#define HAUSUEBUNG_OPCODES_H
+#ifndef KSP_WS20_21_JB_DS_DEFINE_H
+#define KSP_WS20_21_JB_DS_DEFINE_H
 
+// General defines
+#define VERSION 8
+
+
+//methods for decoding and encoding of instructions
+#define IMMEDIATE(x) ((x) & 0x00FFFFFF)
+#define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
+
+#define OPCODE(instr) ((instr)>>24)
+//methods for managing MSB on compound objects
+#define MSB (1 << (8 * sizeof(unsigned int) - 1))
+#define IS_PRIMITIVE(objRef) (((objRef)->size & MSB) == 0)
+#define GET_ELEMENT_COUNT(objRef) ((objRef)->size & ~MSB)
+
+// Defines for Debug
+#define DEBUGHELP " [list]: Lists all program instructions\n [step]: Executes next instruction\n [run]: Runs through the rest of the programm or until the next breakpoint\n [ps]: Prints Stack with stack pointer and frame pointer\n [pd]: Prints all variables in static data area\n [prvr]: Prints the value stored in return value register\n [insp]: Inspect a slot on the stack and display its information\n [bs] Sets a new breakpoint\n [br] Removes the current breakpoint\n [bl] Lists the current breakpoint\n [quit]: Quits NJVM\n [help]: Shows this help\n"
+
+// OP-Codes
 #define HALT 0
 #define PUSHC 1
 #define ADD 2
@@ -44,12 +65,4 @@
 #define PUSHN 39
 #define REFEQ 40
 #define REFNE 41
-
-#define OP_CODE(instr) ((instr)>>24)
-#define IMMEDIATE(x) ((x)&0x00FFFFFF)
-#define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
-#define MSB (1 << (8 * sizeof(unsigned int) - 1))
-#define IS_PRIMITIVE(objRef) (((objRef)->size & MSB) == 0)
-#define GET_ELEMENT_COUNT(objRef) ((objRef)->size & ~MSB)
-
-#endif //HAUSUEBUNG_OPCODES_H
+#endif //KSP_WS20_21_JB_DS_DEFINE_H
