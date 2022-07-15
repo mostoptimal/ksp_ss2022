@@ -1,3 +1,3 @@
-/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles/Aufgaben.dir
-/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles/Aufgaben.dir
+/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles/rebuild_cache.dir

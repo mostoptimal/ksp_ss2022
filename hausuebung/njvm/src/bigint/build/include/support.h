@@ -10,16 +10,16 @@
 /* object representation */
 
 typedef struct {
-    unsigned int size;            /* byte count of payload data */
-    char brokenHeart;           /* broken heart flag */
-    unsigned char data[1];        /* payload data, size as needed */
+  unsigned int size;			/* byte count of payload data */
+  char brokenHeart;           /* broken heart flag */
+  unsigned char data[1];		/* payload data, size as needed */
 } *ObjRef;
 
 
 /* support functions */
 
-void fatalError(char *msg);        /* print a message and exit */
-ObjRef newPrimObject(int dataSize);    /* create a new primitive object */
+void fatalError(char *msg);		/* print a message and exit */
+ObjRef newPrimObject(int dataSize);	/* create a new primitive object */
 
 
 #endif /* _SUPPORT_H_ */

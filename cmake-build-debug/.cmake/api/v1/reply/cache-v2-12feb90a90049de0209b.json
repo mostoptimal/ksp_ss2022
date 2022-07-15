@@ -11,7 +11,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug"
+			"value" : "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug"
 		},
 		{
 			"name" : "Aufgaben_IS_TOP_LEVEL",
@@ -35,7 +35,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022"
+			"value" : "/home/dn/Downloads/ksp final/ksp_ss2022"
 		},
 		{
 			"name" : "CMAKE_ADDR2LINE",
@@ -91,7 +91,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug"
+			"value" : "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -563,7 +563,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022"
+			"value" : "/home/dn/Downloads/ksp final/ksp_ss2022"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
