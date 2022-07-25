@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug",
-		"source" : "/home/dn/Downloads/SS2022/ksp/ksp_ss2022"
+		"build" : "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug",
+		"source" : "/home/dn/Downloads/ksp final/ksp_ss2022"
 	},
 	"version" : 
 	{

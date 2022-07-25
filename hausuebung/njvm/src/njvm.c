@@ -59,8 +59,6 @@ void pushInt(int value) {
 }
 
 void pushObj(ObjRef objRef) {
-
-
     unsigned int defaultStackSize = stackSize * 1024;
     if (stackPointer == (defaultStackSize) / sizeof(StackSlot)) {
         fprintf(stderr, "ERROR: stack overflow - maximum stack size \n");
@@ -125,7 +123,7 @@ ObjRef copyObjectToFreeMem(ObjRef orig) {
     freePointer += origSize;
     return returnPtr;
 }
-
+// from origin to   passivmemory copieren
 ObjRef relocate(ObjRef orig) {
     ObjRef copy;
     if (orig == NULL) {
@@ -142,6 +140,7 @@ ObjRef relocate(ObjRef orig) {
     return copy;
 }
 
+//relocate objrefere SDA STACK REGISTER
 void root(void) {
     for (int i = 0; i < sdaSize; i++) {
         sdaPointer[i] = relocate(sdaPointer[i]);
@@ -157,27 +156,28 @@ void root(void) {
     bip.res = relocate(bip.res);
     bip.rem = relocate(bip.rem);
 }
-
+/**durchläuft hierbei sukzessive den aktiven Halbspeicher und kopiert alle
+erreichbaren Elemente (ausgehend von den Root-Objekten) */
 void scan(void) {
     char *scan = targetPtr;
     while (scan < freePointer) {
         ObjRef compObject = (ObjRef) scan;
-        if (!IS_PRIMITIVE(compObject)) {
+        if (IS_PRIMITIVE(compObject)== false) {
             for (int i = 0; i < GET_ELEMENT_COUNT(compObject); i++) {
                 ((ObjRef *) compObject->data)[i] = relocate(((ObjRef *) compObject->data)[i]);
             }
-            scan += sizeof(int) + sizeof(char) + GET_ELEMENT_COUNT(compObject) * (sizeof(ObjRef *));
+            scan +=  sizeof(char) +sizeof(int) + GET_ELEMENT_COUNT(compObject) * (sizeof(ObjRef *));
         } else {
             scan += compObject->size;
         }
     }
 }
 
-void purgePassiveHalfMemory(void) {
-    char *killPtr;
-    if (targetPtr == heapPtr) killPtr = targetEndPtr;
-    else killPtr = heapPtr;
-    memset(killPtr, 0x0, heapSize * 1024 / 2);
+void purgePassiveMemory(void) {
+    char *killPointer;
+    if (targetPtr == heapPtr) killPointer = targetEndPtr;
+    else killPointer = heapPtr;
+    memset(killPointer, 0x0, heapSize * 1024 / 2);
 }
 
 void countObjects(void) {
@@ -185,8 +185,7 @@ void countObjects(void) {
     char *countPtr = targetPtr;
     while (countPtr < freePointer) {
         countPtr += IS_PRIMITIVE((ObjRef) countPtr) ? ((ObjRef) countPtr)->size : sizeof(int) + sizeof(char *) +
-                                                                                  GET_ELEMENT_COUNT((ObjRef) countPtr) *
-                                                                                  sizeof(void *);
+                GET_ELEMENT_COUNT((ObjRef) countPtr) *sizeof(void *);
         objCount++;
     }
 }
@@ -201,7 +200,7 @@ void collectGarbage(void) {
     swap();
     root();
     scan();
-    if (purge != 0) purgePassiveHalfMemory();
+    if (purge != 0) purgePassiveMemory();
     if (gcStats != 0) {
         countObjects();
         printf("Number of vivid objects: %d\n", objCount);
@@ -226,7 +225,8 @@ ObjRef allocate(int dataSize) {
 
 ObjRef newCompoundObject(int numObjRefs) {
     ObjRef compObj;
-    int objSize = sizeof(int) + sizeof(char) /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
+   unsigned int objectparts=sizeof(int) + sizeof(char);
+    int objSize =  objectparts + numObjRefs * sizeof(void *);
     //round up to multiples of 4
     //if(objSize%4>0) objSize = ((objSize/4)*4)+4;
     compObj = allocate(objSize);

@@ -54,10 +54,10 @@ RM = /home/dn/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5080.224/bin/cm
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dn/Downloads/SS2022/ksp/ksp_ss2022
+CMAKE_SOURCE_DIR = "/home/dn/Downloads/ksp final/ksp_ss2022"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug
+CMAKE_BINARY_DIR = "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug"
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/Aufgaben.dir/clean
 CMakeFiles/Aufgaben.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Aufgaben.dir/build.make CMakeFiles/Aufgaben.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Aufgaben.dir/build.make CMakeFiles/Aufgaben.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles --progress-num=1,2,3 "Built target Aufgaben"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles" --progress-num=1,2,3 "Built target Aufgaben"
 .PHONY : CMakeFiles/Aufgaben.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Aufgaben.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles" 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Aufgaben.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles" 0
 .PHONY : CMakeFiles/Aufgaben.dir/rule
 
 # Convenience name for target.

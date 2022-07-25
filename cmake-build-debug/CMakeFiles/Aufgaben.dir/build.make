@@ -53,10 +53,10 @@ RM = /home/dn/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5080.224/bin/cm
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dn/Downloads/SS2022/ksp/ksp_ss2022
+CMAKE_SOURCE_DIR = "/home/dn/Downloads/ksp final/ksp_ss2022"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug
+CMAKE_BINARY_DIR = "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug"
 
 # Include any dependencies generated for this target.
 include CMakeFiles/Aufgaben.dir/depend.make
@@ -72,30 +72,30 @@ include CMakeFiles/Aufgaben.dir/flags.make
 CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o: CMakeFiles/Aufgaben.dir/flags.make
 CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o: ../aufgaben/a0/njvm.c
 CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o: CMakeFiles/Aufgaben.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o -MF CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o.d -o CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o -c /home/dn/Downloads/SS2022/ksp/ksp_ss2022/aufgaben/a0/njvm.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o -MF CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o.d -o CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o -c "/home/dn/Downloads/ksp final/ksp_ss2022/aufgaben/a0/njvm.c"
 
 CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/dn/Downloads/SS2022/ksp/ksp_ss2022/aufgaben/a0/njvm.c > CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/dn/Downloads/ksp final/ksp_ss2022/aufgaben/a0/njvm.c" > CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.i
 
 CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/dn/Downloads/SS2022/ksp/ksp_ss2022/aufgaben/a0/njvm.c -o CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/dn/Downloads/ksp final/ksp_ss2022/aufgaben/a0/njvm.c" -o CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.s
 
 CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o: CMakeFiles/Aufgaben.dir/flags.make
 CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o: ../hausuebung/njvm/src/njvm.c
 CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o: CMakeFiles/Aufgaben.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o -MF CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o.d -o CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o -c /home/dn/Downloads/SS2022/ksp/ksp_ss2022/hausuebung/njvm/src/njvm.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o -MF CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o.d -o CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o -c "/home/dn/Downloads/ksp final/ksp_ss2022/hausuebung/njvm/src/njvm.c"
 
 CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/dn/Downloads/SS2022/ksp/ksp_ss2022/hausuebung/njvm/src/njvm.c > CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/dn/Downloads/ksp final/ksp_ss2022/hausuebung/njvm/src/njvm.c" > CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.i
 
 CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/dn/Downloads/SS2022/ksp/ksp_ss2022/hausuebung/njvm/src/njvm.c -o CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/dn/Downloads/ksp final/ksp_ss2022/hausuebung/njvm/src/njvm.c" -o CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.s
 
 # Object files for target Aufgaben
 Aufgaben_OBJECTS = \
@@ -109,7 +109,7 @@ Aufgaben: CMakeFiles/Aufgaben.dir/aufgaben/a0/njvm.c.o
 Aufgaben: CMakeFiles/Aufgaben.dir/hausuebung/njvm/src/njvm.c.o
 Aufgaben: CMakeFiles/Aufgaben.dir/build.make
 Aufgaben: CMakeFiles/Aufgaben.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable Aufgaben"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable Aufgaben"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Aufgaben.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -121,6 +121,6 @@ CMakeFiles/Aufgaben.dir/clean:
 .PHONY : CMakeFiles/Aufgaben.dir/clean
 
 CMakeFiles/Aufgaben.dir/depend:
-	cd /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/dn/Downloads/SS2022/ksp/ksp_ss2022 /home/dn/Downloads/SS2022/ksp/ksp_ss2022 /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug /home/dn/Downloads/SS2022/ksp/ksp_ss2022/cmake-build-debug/CMakeFiles/Aufgaben.dir/DependInfo.cmake --color=$(COLOR)
+	cd "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/dn/Downloads/ksp final/ksp_ss2022" "/home/dn/Downloads/ksp final/ksp_ss2022" "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug" "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug" "/home/dn/Downloads/ksp final/ksp_ss2022/cmake-build-debug/CMakeFiles/Aufgaben.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : CMakeFiles/Aufgaben.dir/depend
 
