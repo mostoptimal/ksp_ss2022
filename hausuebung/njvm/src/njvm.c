@@ -107,7 +107,7 @@ void swap(void) {
 
 void copyMemory(char *dest, ObjRef src, int count) {
     //printf("dest %p\nsrc %p\ncount: %d\nisPrimitive: %d\nbrokenHeart: %d\n", dest, src, count, IS_PRIMITIVE(src), src->brokenHeart);
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i <= count; i++) {
         dest[i] = ((char *) src)[i];
     }
 }
@@ -180,7 +180,7 @@ void purgePassiveHalfMemory(void) {
     memset(killPtr, 0x0, heapSize * 1024 / 2);
 }
 
-void countObj(void) {
+void countObjects(void) {
     objCount = 0;
     char *countPtr = targetPtr;
     while (countPtr < freePointer) {
@@ -191,29 +191,28 @@ void countObj(void) {
     }
 }
 
-void garbageCollector(void) {
+void collectGarbage(void) {
     if (gcStats != 0) {
         printf("Garbage Collector triggered!\n");
         int oldCount = objCount;
-        countObj();
-        printf("New objects since last run: %d\n", objCount - oldCount);
+        countObjects();
+        printf("New objects since last run: %d\n", objCount );
     }
     swap();
     root();
     scan();
     if (purge != 0) purgePassiveHalfMemory();
     if (gcStats != 0) {
-        countObj();
+        countObjects();
         printf("Number of vivid objects: %d\n", objCount);
         printf("Memory used by vivid objects: %ld\n", (long) freePointer - (long) targetPtr);
         printf("Free memory: %ld\n\n", (long) targetEndPtr - (long) freePointer);
     }
 }
 
-ObjRef alloc(int dataSize) {
-    //printf("free: %p, size: %d, target: %p, end: %p\n", freePointer, dataSize, freePointer+dataSize, targetEndPtr);
+ObjRef allocate(int dataSize) {
     if (freePointer + dataSize >= targetEndPtr) {
-        garbageCollector();
+        collectGarbage();
         if (freePointer + dataSize >= targetEndPtr) {
             fprintf(stderr, "Error: Not enough heap space to allocate new object\n");
             exit(EXIT_FAILURE);
@@ -230,7 +229,7 @@ ObjRef newCompoundObject(int numObjRefs) {
     int objSize = sizeof(int) + sizeof(char) /*+ sizeof(ObjRef*)*/ + numObjRefs * sizeof(void *);
     //round up to multiples of 4
     //if(objSize%4>0) objSize = ((objSize/4)*4)+4;
-    compObj = alloc(objSize);
+    compObj = allocate(objSize);
     compObj->size = MSB | numObjRefs;
     compObj->brokenHeart = 0;
     for (int i = 0; i < numObjRefs; i++) {
@@ -245,7 +244,7 @@ ObjRef newPrimObject(int dataSize) {
     //round up to multiples of 4
     //if(objSize%4>0) objSize = ((objSize/4)*4)+4;
     ObjRef objRef;
-    objRef = alloc(objSize);
+    objRef = allocate(objSize);
     objRef->size = objSize;
     objRef->brokenHeart = 0;
     return objRef;
@@ -898,7 +897,7 @@ int decodeImmediate(unsigned int code) {
 void callInstruction(int immediatevalue, unsigned int opcode) {
     switch (opcode) {
         case HALT:
-            if (gcStats != 0) garbageCollector();
+            if (gcStats != 0) collectGarbage();
             break;
         case PUSHC:
             pushc(immediatevalue);
@@ -1289,6 +1288,7 @@ void readInput(char *path) {
 /***** File End ***********/
 
 /***** Debugger ***************/
+/*
 char *getInput(void) {
     char inputBuffer[30];
     fgets(inputBuffer, sizeof(inputBuffer), stdin);
@@ -1452,6 +1452,7 @@ void debugProgram(int immediatevalue, int opcode, int printpc) {
         else if (strcmp(input, "bl") == 0) printBreakpoint();
     }
 }
+*/
 /***** Debugger End************/
 // Execute
 void executeProgram(unsigned int *program) {
@@ -1460,17 +1461,17 @@ void executeProgram(unsigned int *program) {
     while (programCounter < numberOfInstructions && opcode != HALT) {
         unsigned int code = program[programCounter];
         opcode = OPCODE(code);
-        int immediatevalue = decodeImmediate(code);
+        int immediateValue = decodeImmediate(code);
         //when the breakpoint is the next command, activate debug and remove the breakpoint
         if (breakpoint == programCounter) {
             debug = 1;
             breakpoint = -1;
         }
         if (debug) {
-            debugProgram(immediatevalue, opcode, programCounter);
+            //debugProgram(immediateValue, opcode, programCounter);
         }
         programCounter++;
-        callInstruction(immediatevalue, opcode);
+        callInstruction(immediateValue, opcode);
     }
 }
 // Execute
